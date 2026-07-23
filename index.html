@@ -6,6 +6,11 @@
 <title>Notes</title>
 <link rel="apple-touch-icon" href="Notes.png">
 <style>
+  /* Ajoute ces lignes tout en haut de tes styles CSS existants */
+    * {
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+    }
 :root{--accent:#3a8fd0;--bg:#f5f7fa;--bg2:#e9eef5;--text:#222;--border:#c8d3e0;--linenum-bg:#e1e6ed;--linenum-color:#8892a0}
 @media(prefers-color-scheme:dark){:root{--bg:#1e1e1e;--bg2:#252526;--text:#fff;--border:#333;--accent:#3a8fd0;--linenum-bg:#2d2d2d;--linenum-color:#858585}}
 body{margin:0;font-family:-apple-system;background:var(--bg);color:var(--text);height:100vh;overflow:hidden}
