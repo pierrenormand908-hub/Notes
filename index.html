@@ -4,9 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Notes</title>
-<link rel="apple-touch-icon" href="Notes.png">
 <style>
-:root{--accent:#8cc7ff;--bg:#f5f7fa;--bg2:#e9eef5;--text:#222;--border:#c8d3e0;--linenum-bg:#e1e6ed;--linenum-color:#8892a0}
+:root{--accent:#3a8fd0;--bg:#f5f7fa;--bg2:#e9eef5;--text:#222;--border:#c8d3e0;--linenum-bg:#e1e6ed;--linenum-color:#8892a0}
 @media(prefers-color-scheme:dark){:root{--bg:#1e1e1e;--bg2:#252526;--text:#fff;--border:#333;--accent:#3a8fd0;--linenum-bg:#2d2d2d;--linenum-color:#858585}}
 body{margin:0;font-family:-apple-system;background:var(--bg);color:var(--text);height:100vh;overflow:hidden}
 header{background:var(--bg2);padding:10px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);height:50px;box-sizing:border-box}
@@ -16,8 +15,8 @@ header{background:var(--bg2);padding:10px;display:flex;align-items:center;gap:10
 .sidebar-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
 .sidebar-header h2{margin:0;font-size:20px}
 #closeSidebar{background:var(--bg);border:1px solid var(--border);color:var(--text);font-size:16px;padding:4px 10px;border-radius:6px;cursor:pointer}
-#sidebar-actions{display:flex;justify-content:space-around;padding:8px 0;margin-bottom:10px;border-bottom:1px solid var(--border)}
-.action-btn{background:var(--bg);border:1px solid var(--border);color:var(--text);font-size:20px;padding:6px 10px;border-radius:6px;cursor:pointer}
+#sidebar-actions{display:flex;flex-wrap:wrap;gap:6px;padding:8px 0;margin-bottom:10px;border-bottom:1px solid var(--border);justify-content:space-between}
+.action-btn{background:var(--bg);border:1px solid var(--border);color:var(--text);font-size:18px;padding:6px 10px;border-radius:6px;cursor:pointer;display:flex;align-items:center;gap:4px}
 #treeList{list-style:none;padding:0;margin:0;overflow-y:auto;flex:1}
 #treeList li{padding:4px 6px;border-radius:4px;cursor:pointer;display:flex;align-items:center;gap:6px;user-select:none;position:relative}
 #treeList li.active{background:var(--accent);color:#fff}
@@ -64,11 +63,11 @@ header{background:var(--bg2);padding:10px;display:flex;align-items:center;gap:10
     <button id="closeSidebar" title="Fermer">⬅</button>
   </div>
   <div id="sidebar-actions">
-    <button class="action-btn" id="addFolder" title="Dossier">📁</button>
-    <button class="action-btn" id="addSubFolder" title="Sous-dossier">📂</button>
-    <button class="action-btn" id="addNote" title="Note">📝</button>
-    <button class="action-btn" id="exportBtn" title="Sauvegarder les notes (Export)">💾</button>
-    <button class="action-btn" id="importBtn" title="Restaurer les notes (Import)">📂<input type="file" id="importFile" accept=".json" style="display:none"></button>
+    <button class="action-btn" id="addFolder" title="Nouveau Dossier">📁</button>
+    <button class="action-btn" id="addSubFolder" title="Nouveau Sous-dossier">📂</button>
+    <button class="action-btn" id="addNote" title="Nouvelle Note / Sous-note">📝</button>
+    <button class="action-btn" id="exportBtn" title="Enregistrer l'arbre complet" style="font-size:14px; font-weight:bold;">💾 Enregistrer</button>
+    <button class="action-btn" id="importBtn" title="Restaurer l'arbre" style="font-size:14px;">📂 Charger<input type="file" id="importFile" accept=".json" style="display:none"></button>
   </div>
   <ul id="treeList"></ul>
 </div>
@@ -146,18 +145,18 @@ function load(){
 }
 function save(){ localStorage.setItem(KEY, JSON.stringify(items)); }
 
-// Sauvegarde fichier JSON (Export)
+// Enregistrer l'arbre (Export JSON)
 document.getElementById("exportBtn").onclick = () => {
   let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(items, null, 2));
   let dlAnchorElem = document.createElement('a');
   dlAnchorElem.setAttribute("href", dataStr);
-  dlAnchorElem.setAttribute("download", "mes_notes_backup.json");
+  dlAnchorElem.setAttribute("download", "mes_notes_arbre.json");
   document.body.appendChild(dlAnchorElem);
   dlAnchorElem.click();
   dlAnchorElem.remove();
 };
 
-// Restauration fichier JSON (Import)
+// Restaurer l'arbre (Import JSON)
 document.getElementById("importBtn").onclick = () => { document.getElementById("importFile").click(); };
 document.getElementById("importFile").onchange = (e) => {
   let file = e.target.files[0];
@@ -170,9 +169,9 @@ document.getElementById("importFile").onchange = (e) => {
       currentId = items[0]?.id || null;
       render();
       loadCurrent();
-      alert("Notes restaurées avec succès !");
+      alert("Arbre de notes restauré avec succès !");
     } catch(err) {
-      alert("Erreur lors de la lecture du fichier de sauvegarde.");
+      alert("Erreur lors de la lecture du fichier.");
     }
   };
   reader.readAsText(file);
@@ -200,7 +199,9 @@ function render(){
       if(item.italic) li.style.fontStyle = "italic";
       if(item.underline) li.style.textDecoration = "underline";
 
-      let arrow = item.type !== "note" ? (item.open ? "▼" : "▶") : "";
+      let hasChildren = items.some(i => i.parent === item.id);
+      let arrow = (item.type !== "note" || hasChildren) ? (item.open ? "▼" : "▶") : "";
+
       li.innerHTML = '<span class="arrow">'+arrow+'</span><span>'+iconHTML(item)+'</span><span class="item-title">'+item.title+'</span><span class="item-menu-icon" title="Menu">⋮</span>';
 
       li.querySelector(".arrow")?.addEventListener("click", e => { e.stopPropagation(); item.open = !item.open; save(); render(); });
@@ -294,7 +295,14 @@ createSub.onclick = () => {
   save(); render(); modalSub.style.display="none";
 };
 
-addNote.onclick = () => { let p = items.find(i=>i.id===currentId); if(!p) return alert("Sélectionne un dossier"); items.push({id:Date.now(), type:"note", title:"Nouvelle note", parent:p.id, content:"", icon:"emoji:📝", font:"-apple-system", size:"14px", bold:false, italic:false, underline:false}); p.open=true; save(); render(); };
+addNote.onclick = () => { 
+  let p = items.find(i=>i.id===currentId); 
+  if(!p) return alert("Sélectionne un dossier, sous-dossier ou une note"); 
+  items.push({id:Date.now(), type:"note", title:"Nouvelle note", parent:p.id, content:"", icon:"emoji:📝", font:"-apple-system", size:"14px", bold:false, italic:false, underline:false}); 
+  p.open=true; 
+  save(); 
+  render(); 
+};
 cancelModalNote.onclick = () => modalNote.style.display="none";
 saveNoteOpt.onclick = () => {
   if(menuTarget && menuTarget.type==="note"){ Object.assign(menuTarget, {title:noteName.value||"Note", bg:noteBgColor.value, color:noteTextColor.value, icon:noteIcon.value, font:noteFont.value, size:noteSize.value, bold:noteBold.checked, italic:noteItalic.checked, underline:noteUnderline.checked}); save(); render(); loadCurrent(); }
