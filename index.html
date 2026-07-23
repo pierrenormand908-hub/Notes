@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Notes</title>
+<link rel="apple-touch-icon" href="Notes.png">
+<style>
+:root{--accent:#8cc7ff;--bg:#f5f7fa;--bg2:#e9eef5;--text:#222;--border:#c8d3e0;--linenum-bg:#e1e6ed;--linenum-color:#8892a0}
+@media(prefers-color-scheme:dark){:root{--bg:#1e1e1e;--bg2:#252526;--text:#fff;--border:#333;--accent:#3a8fd0;--linenum-bg:#2d2d2d;--linenum-color:#858585}}
+body{margin:0;font-family:-apple-system;background:var(--bg);color:var(--text);height:100vh;overflow:hidden}
+header{background:var(--bg2);padding:10px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);height:50px;box-sizing:border-box}
+#toggleSidebar{font-size:18px;padding:6px 12px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:6px;cursor:pointer}
+#sidebar{position:fixed;top:0;left:0;width:260px;height:100vh;background:var(--bg2);border-right:1px solid var(--border);padding:10px;z-index:999;display:flex;flex-direction:column;transform:translateX(-280px);transition:.25s ease-in-out;box-sizing:border-box}
+#sidebar.open{transform:translateX(0)}
+.sidebar-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.sidebar-header h2{margin:0;font-size:20px}
+#closeSidebar{background:var(--bg);border:1px solid var(--border);color:var(--text);font-size:16px;padding:4px 10px;border-radius:6px;cursor:pointer}
+#sidebar-actions{display:flex;justify-content:space-around;padding:8px 0;margin-bottom:10px;border-bottom:1px solid var(--border)}
+.action-btn{background:var(--bg);border:1px solid var(--border);color:var(--text);font-size:20px;padding:6px 10px;border-radius:6px;cursor:pointer}
+#treeList{list-style:none;padding:0;margin:0;overflow-y:auto;flex:1}
+#treeList li{padding:4px 6px;border-radius:4px;cursor:pointer;display:flex;align-items:center;gap:6px;user-select:none;position:relative}
+#treeList li.active{background:var(--accent);color:#fff}
+.arrow{width:18px;text-align:center;cursor:pointer;flex-shrink:0}
+.tree-icon-png{width:20px;height:20px;object-fit:contain;vertical-align:middle;flex-shrink:0}
+.item-title{flex-grow:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:25px}
+.item-menu-icon{position:absolute;right:4px;top:50%;transform:translateY(-50%);font-size:18px;font-weight:bold;color:#888;display:none;padding:2px 5px;border-radius:4px;z-index:10}
+#treeList li:hover .item-menu-icon,#treeList li.active .item-menu-icon{display:block}
+#treeList li .item-menu-icon:hover{background:rgba(0,0,0,0.1);color:var(--text)}
+#contextMenu{position:absolute;background:var(--bg2);border:1px solid var(--border);border-radius:6px;box-shadow:0 2px 10px rgba(0,0,0,.2);z-index:5000;display:none;min-width:120px}
+#contextMenu button{display:block;width:100%;padding:8px 12px;text-align:left;background:none;border:none;color:var(--text);cursor:pointer;font-size:16px}
+#contextMenu button:hover{background:var(--accent);color:#fff}
+.delete-option{color:#d33!important}
+
+#main{position:absolute;top:70px;left:0;right:0;bottom:0;transition:left .25s ease-in-out;display:flex;flex-direction:column}
+#editor-header{padding:10px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:center}
+#node-title{flex:1;padding:8px;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:16px;}
+#toggleLinesBtn{padding:6px 12px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-weight:bold;font-size:14px;}
+#toggleLinesBtn.active{background:var(--accent);color:#fff}
+
+.editor-container{display:flex;flex:1;position:relative;overflow:hidden}
+#lineNumbers{width:45px;background:var(--linenum-bg);color:var(--linenum-color);font-family:monospace;font-size:14px;padding:12px 4px;text-align:right;user-select:none;overflow:hidden;box-sizing:border-box;display:none;line-height:1.5}
+#content{flex:1;background:var(--bg);color:var(--text);border:none;padding:12px;resize:none;box-sizing:border-box;font-size:14px;font-family:monospace;line-height:1.5;overflow-y:auto;white-space:pre;word-wrap:normal}
+
+#modal,#modalSub,#modalNote,#confirmDelete{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;justify-content:center;align-items:center;z-index:3000}
+.modalBox{background:var(--bg2);padding:20px;width:90%;max-width:320px;border-radius:10px;display:flex;flex-direction:column;gap:8px;max-height:90vh;overflow-y:auto}
+.modalBox input,.modalBox select{width:100%;padding:8px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);box-sizing:border-box;font-size:16px;}
+.modal-row{display:flex;gap:10px}
+.modal-col{flex:1;display:flex;flex-direction:column;align-items:center;font-size:14px;cursor:pointer}
+.modal-col input[type="checkbox"]{width:auto;margin-top:4px;cursor:pointer}
+.modalButtons{display:flex;gap:10px;margin-top:10px}
+.modal-btn{flex:1;padding:10px;border-radius:6px;border:none;font-size:16px;cursor:pointer}
+.create-btn{background:var(--accent);color:#fff}.cancel-btn{background:#777;color:#fff}
+.icon-yellow{color:#fbc02d}
+</style>
+</head>
+<body>
+
+<header><button id="toggleSidebar">▶</button><h1>Notes</h1></header>
+
+<div id="sidebar">
+  <div class="sidebar-header">
+    <h2>Arbre</h2>
+    <button id="closeSidebar" title="Fermer">⬅</button>
+  </div>
+  <div id="sidebar-actions">
+    <button class="action-btn" id="addFolder" title="Dossier">📁</button>
+    <button class="action-btn" id="addSubFolder" title="Sous-dossier">📂</button>
+    <button class="action-btn" id="addNote" title="Note">📝</button>
+    <button class="action-btn" id="exportBtn" title="Sauvegarder les notes (Export)">💾</button>
+    <button class="action-btn" id="importBtn" title="Restaurer les notes (Import)">📂<input type="file" id="importFile" accept=".json" style="display:none"></button>
+  </div>
+  <ul id="treeList"></ul>
+</div>
+
+<div id="contextMenu">
+    <button id="ctxOptions">Options</button>
+    <button id="ctxDelete" class="delete-option">Supprimer</button>
+</div>
+
+<!-- MODALS -->
+<div id="modal"><div class="modalBox"><h3>Option Dossier</h3><input id="folderName" placeholder="Nom"><label>Police :</label><select id="folderFont"><option value="-apple-system">Défaut</option><option value="Arial">Arial</option><option value="Courier New">Courier New</option><option value="Georgia">Georgia</option><option value="Verdana">Verdana</option></select><label>Taille :</label><select id="folderSize"><option value="13px">13px</option><option value="14px" selected>14px</option><option value="16px">16px</option><option value="18px">18px</option></select><div class="modal-row"><label class="modal-col">Gras<input type="checkbox" id="folderBold"></label><label class="modal-col">Italique<input type="checkbox" id="folderItalic"></label><label class="modal-col">Souligné<input type="checkbox" id="folderUnderline"></label></div><label>Fond :</label><input type="color" id="folderBgColor" value="#252526"><label>Texte :</label><input type="color" id="folderTextColor" value="#ffffff"><label>Icône :</label><select id="folderIcon"><option value="emoji:📁">📁 Dossier</option><option value="emoji:📂">📂 Dossier ouvert</option><option value="emoji:⭐">⭐ Étoile</option><option value="emoji:💡">💡 Idée</option><option value="png:icone1">🖼️ PNG 1</option><option value="png:icone2">🖼️ PNG 2</option><option value="png:icone3">🖼️ PNG 3</option><option value="png:icone4">🖼️ PNG 4</option><option value="png:icone5">🖼️ PNG 5</option><option value="png:icone6">🖼️ PNG 6</option></select><div class="modalButtons"><button class="modal-btn cancel-btn" id="cancelModal">Annuler</button><button class="modal-btn create-btn" id="createFolder">OK</button></div></div></div>
+
+<div id="modalSub"><div class="modalBox"><h3>Option Sous-dossier</h3><input id="subName" placeholder="Nom"><label>Police :</label><select id="subFont"><option value="-apple-system">Défaut</option><option value="Arial">Arial</option><option value="Courier New">Courier New</option><option value="Georgia">Georgia</option><option value="Verdana">Verdana</option></select><label>Taille :</label><select id="subSize"><option value="13px">13px</option><option value="14px" selected>14px</option><option value="16px">16px</option><option value="18px">18px</option></select><div class="modal-row"><label class="modal-col">Gras<input type="checkbox" id="subBold"></label><label class="modal-col">Italique<input type="checkbox" id="subItalic"></label><label class="modal-col">Souligné<input type="checkbox" id="subUnderline"></label></div><label>Fond :</label><input type="color" id="subBgColor" value="#252526"><label>Texte :</label><input type="color" id="subTextColor" value="#ffffff"><label>Icône :</label><select id="subIcon"><option value="emoji:📂">📂 Sous-dossier</option><option value="emoji:📁">📁 Dossier</option><option value="emoji:⭐">⭐ Étoile</option><option value="emoji:📌">📌 Épingle</option><option value="png:icone1">🖼️ PNG 1</option><option value="png:icone2">🖼️ PNG 2</option><option value="png:icone3">🖼️ PNG 3</option><option value="png:icone4">🖼️ PNG 4</option><option value="png:icone5">🖼️ PNG 5</option><option value="png:icone6">🖼️ PNG 6</option></select><div class="modalButtons"><button class="modal-btn cancel-btn" id="cancelModalSub">Annuler</button><button class="modal-btn create-btn" id="createSub">OK</button></div></div></div>
+
+<div id="modalNote"><div class="modalBox"><h3>Option Note</h3><input id="noteName" placeholder="Titre"><label>Police :</label><select id="noteFont"><option value="-apple-system">Défaut</option><option value="Arial">Arial</option><option value="Courier New">Courier New</option><option value="Georgia">Georgia</option><option value="Verdana">Verdana</option></select><label>Taille :</label><select id="noteSize"><option value="13px">13px</option><option value="14px" selected>14px</option><option value="16px">16px</option><option value="18px">18px</option></select><div class="modal-row"><label class="modal-col">Gras<input type="checkbox" id="noteBold"></label><label class="modal-col">Italique<input type="checkbox" id="noteItalic"></label><label class="modal-col">Souligné<input type="checkbox" id="noteUnderline"></label></div><label>Fond :</label><input type="color" id="noteBgColor" value="#252526"><label>Texte :</label><input type="color" id="noteTextColor" value="#ffffff"><label>Icône :</label><select id="noteIcon"><option value="emoji:📝">📝 Note</option><option value="emoji:📄">📄 Page</option><option value="emoji:⭐">⭐ Étoile</option><option value="emoji:📌">📌 Épingle</option><option value="png:icone1">🖼️ PNG 1</option><option value="png:icone2">🖼️ PNG 2</option><option value="png:icone3">🖼️ PNG 3</option><option value="png:icone4">🖼️ PNG 4</option><option value="png:icone5">🖼️ PNG 5</option><option value="png:icone6">🖼️ PNG 6</option></select><div class="modalButtons"><button class="modal-btn cancel-btn" id="cancelModalNote">Annuler</button><button class="modal-btn create-btn" id="saveNoteOpt">OK</button></div></div></div>
+
+<div id="confirmDelete"><div class="modalBox"><h3>Supprimer ?</h3><p id="delName"></p><div class="modalButtons"><button class="modal-btn cancel-btn" id="delCancel">Annuler</button><button class="modal-btn create-btn" id="delOk" style="background:#d33">Supprimer</button></div></div></div>
+
+<div id="main">
+  <div id="editor-header">
+    <input id="node-title" placeholder="Titre">
+    <button id="toggleLinesBtn" title="Afficher/Masquer les numéros de ligne">123</button>
+  </div>
+  <div class="editor-container">
+    <div id="lineNumbers"></div>
+    <textarea id="content" placeholder="Tape ta note ou colle ton code..."></textarea>
+  </div>
+</div>
+
+<script>
+const customPngIcons = {icone1:"icone1.png", icone2:"icone2.png", icone3:"icone3.png", icone4:"icone4.png", icone5:"icone5.png", icone6:"icone6.png"};
+let items=[], currentId=null, KEY="notes_joplin", menuTarget=null, showLines=false,
+sidebar=document.getElementById("sidebar"), main=document.getElementById("main"),
+toggleBtn=document.getElementById("toggleSidebar"), closeBtn=document.getElementById("closeSidebar"),
+tree=document.getElementById("treeList"), titleInput=document.getElementById("node-title"),
+contentInput=document.getElementById("content"), lineNumbers=document.getElementById("lineNumbers"),
+toggleLinesBtn=document.getElementById("toggleLinesBtn"), contextMenu=document.getElementById("contextMenu");
+
+document.querySelectorAll(".modalBox").forEach(b => {b.onclick = e => e.stopPropagation();});
+
+toggleBtn.onclick = () => { let open = sidebar.classList.toggle("open"); toggleBtn.textContent = open ? "◀" : "▶"; if(innerWidth>768) main.classList.toggle("shifted", open); };
+closeBtn.onclick = () => { sidebar.classList.remove("open"); toggleBtn.textContent = "▶"; if(innerWidth>768) main.classList.remove("shifted"); };
+
+function updateLineNumbers(){
+  if(!showLines) return;
+  const lines = contentInput.value.split("\n").length;
+  let html = "";
+  for(let i = 1; i <= lines; i++) {
+    html += i + "<br>";
+  }
+  lineNumbers.innerHTML = html;
+}
+
+toggleLinesBtn.onclick = () => {
+  showLines = !showLines;
+  if(showLines){
+    lineNumbers.style.display = "block";
+    toggleLinesBtn.classList.add("active");
+    updateLineNumbers();
+  } else {
+    lineNumbers.style.display = "none";
+    toggleLinesBtn.classList.remove("active");
+  }
+};
+
+contentInput.onscroll = () => {
+  if(showLines) lineNumbers.scrollTop = contentInput.scrollTop;
+};
+
+function load(){
+  items = JSON.parse(localStorage.getItem(KEY) || "[]");
+  if(!items.length){ items.push({id:Date.now(), type:"folder", title:"Principal", parent:null, content:"", open:true, color:"#fff", bg:"#252526", icon:"emoji:📁", font:"-apple-system", size:"14px", bold:false, italic:false, underline:false}); save(); }
+  if(!currentId) currentId = items[0].id;
+  render(); loadCurrent();
+}
+function save(){ localStorage.setItem(KEY, JSON.stringify(items)); }
+
+// Sauvegarde fichier JSON (Export)
+document.getElementById("exportBtn").onclick = () => {
+  let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(items, null, 2));
+  let dlAnchorElem = document.createElement('a');
+  dlAnchorElem.setAttribute("href", dataStr);
+  dlAnchorElem.setAttribute("download", "mes_notes_backup.json");
+  document.body.appendChild(dlAnchorElem);
+  dlAnchorElem.click();
+  dlAnchorElem.remove();
+};
+
+// Restauration fichier JSON (Import)
+document.getElementById("importBtn").onclick = () => { document.getElementById("importFile").click(); };
+document.getElementById("importFile").onchange = (e) => {
+  let file = e.target.files[0];
+  if(!file) return;
+  let reader = new FileReader();
+  reader.onload = function(event) {
+    try {
+      items = JSON.parse(event.target.result);
+      save();
+      currentId = items[0]?.id || null;
+      render();
+      loadCurrent();
+      alert("Notes restaurées avec succès !");
+    } catch(err) {
+      alert("Erreur lors de la lecture du fichier de sauvegarde.");
+    }
+  };
+  reader.readAsText(file);
+};
+
+function iconHTML(i){
+  if(i.icon?.startsWith("png:")) return '<img src="'+customPngIcons[i.icon.split(":")[1]]+'" class="tree-icon-png">';
+  if(i.icon?.startsWith("yellow:")) return '<span class="icon-yellow">'+i.icon.split(":")[1]+'</span>';
+  if(i.icon?.startsWith("emoji:")) return i.icon.split(":")[1];
+  return i.type === "note" ? "📝" : "📁";
+}
+
+function render(){
+  tree.innerHTML = "";
+  (function lvl(pid, indent){
+    items.filter(i => i.parent === pid).forEach(item => {
+      let li = document.createElement("li");
+      li.className = item.id === currentId ? "active" : "";
+      li.style.paddingLeft = indent + "px";
+      if(item.color) li.style.color = item.color;
+      if(item.bg) li.style.background = item.bg;
+      if(item.font) li.style.fontFamily = item.font;
+      if(item.size) li.style.fontSize = item.size;
+      if(item.bold) li.style.fontWeight = "bold";
+      if(item.italic) li.style.fontStyle = "italic";
+      if(item.underline) li.style.textDecoration = "underline";
+
+      let arrow = item.type !== "note" ? (item.open ? "▼" : "▶") : "";
+      li.innerHTML = '<span class="arrow">'+arrow+'</span><span>'+iconHTML(item)+'</span><span class="item-title">'+item.title+'</span><span class="item-menu-icon" title="Menu">⋮</span>';
+
+      li.querySelector(".arrow")?.addEventListener("click", e => { e.stopPropagation(); item.open = !item.open; save(); render(); });
+      
+      li.querySelector(".item-menu-icon").onclick = e => {
+        e.stopPropagation();
+        menuTarget = item;
+        let rect = e.target.getBoundingClientRect();
+        contextMenu.style.top = rect.bottom + "px";
+        contextMenu.style.left = rect.left + "px";
+        contextMenu.style.display = "block";
+      };
+
+      li.onclick = () => { currentId = item.id; loadCurrent(); render(); };
+      tree.appendChild(li);
+      if(item.open) lvl(item.id, indent + 20);
+    });
+  })(null, 0);
+}
+
+window.onclick = () => contextMenu.style.display = "none";
+
+function loadCurrent(){ 
+  let i = items.find(x => x.id === currentId); 
+  if(i){ 
+    titleInput.value = i.title; 
+    contentInput.value = i.content || ""; 
+    updateLineNumbers();
+  } 
+}
+
+titleInput.oninput = () => { let i = items.find(x => x.id === currentId); if(i){ i.title = titleInput.value; save(); render(); } };
+contentInput.oninput = () => { 
+  let i = items.find(x => x.id === currentId); 
+  if(i){ 
+    i.content = contentInput.value; 
+    save(); 
+    updateLineNumbers();
+  } 
+};
+
+/* GESTION MENU CONTEXTUEL */
+ctxOptions.onclick = () => { openOptionsFor(menuTarget); };
+ctxDelete.onclick = () => {
+  delName.textContent = "Supprimer : " + menuTarget.title;
+  confirmDelete.style.display = "flex";
+};
+delCancel.onclick = () => confirmDelete.style.display = "none";
+delOk.onclick = () => {
+  let rm = id => { items = items.filter(i => i.id !== id); items.filter(i => i.parent === id).forEach(c => rm(c.id)); };
+  rm(menuTarget.id); save(); render(); confirmDelete.style.display = "none";
+};
+
+function openOptionsFor(item){
+  if(item.type === "folder"){
+    folderName.value = item.title; folderBgColor.value = item.bg||"#252526"; folderTextColor.value = item.color||"#fff"; folderIcon.value = item.icon||"emoji:📁";
+    folderFont.value = item.font||"-apple-system"; folderSize.value = item.size||"14px";
+    folderBold.checked = !!item.bold; folderItalic.checked = !!item.italic; folderUnderline.checked = !!item.underline;
+    modal.style.display = "flex";
+  }
+  else if(item.type === "subfolder"){
+    subName.value = item.title; subBgColor.value = item.bg||"#252526"; subTextColor.value = item.color||"#fff"; subIcon.value = item.icon||"emoji:📂";
+    subFont.value = item.font||"-apple-system"; subSize.value = item.size||"14px";
+    subBold.checked = !!item.bold; subItalic.checked = !!item.italic; subUnderline.checked = !!item.underline;
+    modalSub.style.display = "flex";
+  }
+  else if(item.type === "note"){
+    noteName.value = item.title; noteBgColor.value = item.bg||"#252526"; noteTextColor.value = item.color||"#fff"; noteIcon.value = item.icon||"emoji:📝";
+    noteFont.value = item.font||"-apple-system"; noteSize.value = item.size||"14px";
+    noteBold.checked = !!item.bold; noteItalic.checked = !!item.italic; noteUnderline.checked = !!item.underline;
+    modalNote.style.display = "flex";
+  }
+}
+
+addFolder.onclick = () => { folderName.value=""; menuTarget=null; folderFont.value="-apple-system"; folderSize.value="14px"; folderBold.checked=false; folderItalic.checked=false; folderUnderline.checked=false; modal.style.display="flex"; };
+cancelModal.onclick = () => modal.style.display="none";
+createFolder.onclick = () => {
+  let d = {title:folderName.value||"Dossier", bg:folderBgColor.value, color:folderTextColor.value, icon:folderIcon.value, font:folderFont.value, size:folderSize.value, bold:folderBold.checked, italic:folderItalic.checked, underline:folderUnderline.checked};
+  if(menuTarget && menuTarget.type==="folder") { Object.assign(menuTarget, d); }
+  else { items.push(Object.assign({id:Date.now(), type:"folder", parent:null, content:"", open:true}, d)); }
+  save(); render(); modal.style.display="none";
+};
+
+addSubFolder.onclick = () => { let p = items.find(i=>i.id===currentId); if(!p||p.type==="note") return alert("Sélectionne un dossier"); subName.value=""; menuTarget=null; subFont.value="-apple-system"; subSize.value="14px"; subBold.checked=false; subItalic.checked=false; subUnderline.checked=false; modalSub.style.display="flex"; };
+cancelModalSub.onclick = () => modalSub.style.display="none";
+createSub.onclick = () => {
+  let p = items.find(i=>i.id===currentId);
+  let d = {title:subName.value||"Sous-dossier", bg:subBgColor.value, color:subTextColor.value, icon:subIcon.value, font:subFont.value, size:subSize.value, bold:subBold.checked, italic:subItalic.checked, underline:subUnderline.checked};
+  if(menuTarget && menuTarget.type==="subfolder") { Object.assign(menuTarget, d); }
+  else { items.push(Object.assign({id:Date.now(), type:"subfolder", parent:p.id, content:"", open:true}, d)); p.open=true; }
+  save(); render(); modalSub.style.display="none";
+};
+
+addNote.onclick = () => { let p = items.find(i=>i.id===currentId); if(!p) return alert("Sélectionne un dossier"); items.push({id:Date.now(), type:"note", title:"Nouvelle note", parent:p.id, content:"", icon:"emoji:📝", font:"-apple-system", size:"14px", bold:false, italic:false, underline:false}); p.open=true; save(); render(); };
+cancelModalNote.onclick = () => modalNote.style.display="none";
+saveNoteOpt.onclick = () => {
+  if(menuTarget && menuTarget.type==="note"){ Object.assign(menuTarget, {title:noteName.value||"Note", bg:noteBgColor.value, color:noteTextColor.value, icon:noteIcon.value, font:noteFont.value, size:noteSize.value, bold:noteBold.checked, italic:noteItalic.checked, underline:noteUnderline.checked}); save(); render(); loadCurrent(); }
+  modalNote.style.display="none";
+};
+
+load();
+</script></body></html>
