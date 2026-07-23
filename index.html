@@ -193,7 +193,6 @@ function render(){
       li.className = item.id === currentId ? "active" : "";
       li.style.paddingLeft = indent + "px";
       
-      // Si l'élément n'est PAS actif, on applique ses styles personnalisés
       if(item.id !== currentId){
         if(item.color) li.style.color = item.color;
         if(item.bg) li.style.background = item.bg;
@@ -221,7 +220,12 @@ function render(){
         contextMenu.style.display = "block";
       };
 
-      li.onclick = () => { currentId = item.id; loadCurrent(); render(); };
+      li.onclick = () => { 
+        currentId = item.id; 
+        loadCurrent(); 
+        render(); 
+      };
+      
       tree.appendChild(li);
       if(item.open) lvl(item.id, indent + 20);
     });
