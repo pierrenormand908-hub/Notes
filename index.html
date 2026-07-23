@@ -225,11 +225,12 @@ function render(){
         contextMenu.style.display = "block";
       };
 
-      li.onclick = () => { 
+     li.addEventListener("pointerdown", e => {
+        e.preventDefault(); // Empêche le délai tactile et le zoom indésirable sur iOS
         currentId = item.id; 
         loadCurrent(); 
         render(); 
-      };
+      });
       
       tree.appendChild(li);
       if(item.open) lvl(item.id, indent + 20);
