@@ -225,8 +225,11 @@ function render(){
         contextMenu.style.display = "block";
       };
 
-     li.addEventListener("pointerdown", e => {
-        e.preventDefault(); // Empêche le délai tactile et le zoom indésirable sur iOS
+    li.addEventListener("pointerdown", e => {
+        // Si on clique sur le menu (⋮) ou sur la flèche, on laisse faire leur propre action
+        if (e.target.closest(".item-menu-icon") || e.target.closest(".arrow")) return;
+
+        e.preventDefault(); 
         currentId = item.id; 
         loadCurrent(); 
         render(); 
