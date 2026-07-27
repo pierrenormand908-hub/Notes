@@ -109,7 +109,7 @@ header{background:var(--bg2);padding:10px;display:flex;align-items:center;gap:10
     
     <label>Icône :</label>
     <div class="icon-picker-section">
-      <div class="icon-preview-box" id="folderIconPreview">📁</div>
+     
       <div class="icon-scroll-list" id="folderIconList"></div>
     </div>
 
@@ -136,7 +136,7 @@ header{background:var(--bg2);padding:10px;display:flex;align-items:center;gap:10
     
     <label>Icône :</label>
     <div class="icon-picker-section">
-      <div class="icon-preview-box" id="subIconPreview">📂</div>
+     
       <div class="icon-scroll-list" id="subIconList"></div>
     </div>
 
@@ -163,7 +163,7 @@ header{background:var(--bg2);padding:10px;display:flex;align-items:center;gap:10
     
     <label>Icône :</label>
     <div class="icon-picker-section">
-      <div class="icon-preview-box" id="noteIconPreview">📝</div>
+     
       <div class="icon-scroll-list" id="noteIconList"></div>
     </div>
 
@@ -387,11 +387,9 @@ function renderIconPreview(iconVal) {
 }
 
 // Fonction générique pour construire le sélecteur d'icônes avec aperçu fixe
-function setupIconPicker(targetType, previewElemId, listElemId) {
-  const previewBox = document.getElementById(previewElemId);
+// Fonction sans aperçu du haut
+function setupIconPicker(targetType, listElemId) {
   const scrollList = document.getElementById(listElemId);
-  
-  previewBox.innerHTML = renderIconPreview(tempSelectedIcons[targetType]);
   scrollList.innerHTML = "";
 
   iconOptionsList.forEach(opt => {
@@ -416,7 +414,6 @@ function setupIconPicker(targetType, previewElemId, listElemId) {
       scrollList.querySelectorAll(".icon-option").forEach(el => el.classList.remove("selected"));
       div.classList.add("selected");
       tempSelectedIcons[targetType] = formattedVal;
-      previewBox.innerHTML = renderIconPreview(formattedVal);
     };
 
     scrollList.appendChild(div);
