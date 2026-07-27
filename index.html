@@ -56,10 +56,8 @@ header{background:var(--bg2);padding:10px;display:flex;align-items:center;gap:10
 .create-btn{background:var(--accent);color:#fff}.cancel-btn{background:#777;color:#fff}
 .icon-yellow{color:#fbc02d}
 
-/* Style du carré d'aperçu d'icône et du conteneur d'icônes */
+/* Style du conteneur d'icônes */
 .icon-picker-section { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
-.icon-preview-box { width: 50px; height: 50px; border: 2px dashed var(--border); border-radius: 8px; display: flex; align-items: center; justify-content: center; background: var(--bg); margin: 0 auto; font-size: 26px; overflow: hidden; flex-shrink: 0; }
-.icon-preview-box img { width: 32px; height: 32px; object-fit: contain; }
 .icon-scroll-list { max-height: 120px; overflow-y: auto; border: 1px solid var(--border); border-radius: 6px; padding: 6px; background: var(--bg); display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
 .icon-option { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border: 1px solid transparent; border-radius: 4px; cursor: pointer; font-size: 20px; background: var(--bg2); }
 .icon-option:hover, .icon-option.selected { border-color: var(--accent); background: rgba(58,143,208,0.2); }
@@ -109,7 +107,6 @@ header{background:var(--bg2);padding:10px;display:flex;align-items:center;gap:10
     
     <label>Icône :</label>
     <div class="icon-picker-section">
-     
       <div class="icon-scroll-list" id="folderIconList"></div>
     </div>
 
@@ -136,7 +133,6 @@ header{background:var(--bg2);padding:10px;display:flex;align-items:center;gap:10
     
     <label>Icône :</label>
     <div class="icon-picker-section">
-     
       <div class="icon-scroll-list" id="subIconList"></div>
     </div>
 
@@ -163,7 +159,6 @@ header{background:var(--bg2);padding:10px;display:flex;align-items:center;gap:10
     
     <label>Icône :</label>
     <div class="icon-picker-section">
-     
       <div class="icon-scroll-list" id="noteIconList"></div>
     </div>
 
@@ -185,35 +180,31 @@ header{background:var(--bg2);padding:10px;display:flex;align-items:center;gap:10
 </div>
 
 <script>
-// Dictionnaire d'icônes PNG utilisant des URL directes Web (Ex: GitHub / Web)
+// Dictionnaire d'icônes PNG utilisant des URL directes Web
 const customPngIcons = {
   url1: "https://icons.iconarchive.com/icons/fatcow/farm-fresh/32/file-extension-html-icon.png",
-  url2: "https://icons.iconarchive.com/icons/fatcow/farm-fresh/32/file-extension-wps-icon.png" , 
-  url3: "https://icons.iconarchive.com/icons/fatcow/farm-fresh/32/file-extension-xls-icon.png" , 
-  url4: "https://icons.iconarchive.com/icons/fatcow/farm-fresh/32/page-add-icon.png" , 
-  url5: "https://icons.iconarchive.com/icons/fatcow/farm-fresh/32/page-code-icon.png" , 
-  url6: "https://icons.iconarchive.com/icons/fatcow/farm-fresh/32/page-white-excel-icon.png" , 
-  url7: "https://icons.iconarchive.com/icons/fatcow/farm-fresh/32/page-white-word-icon.png" , 
-  url8: "https://icons.iconarchive.com/icons/hopstarter/office-2010/32/Microsoft-Office-Access-icon.png" , 
-  url9: "https://icons.iconarchive.com/icons/hopstarter/office-2010/32/Microsoft-Office-Excel-icon.png" ,
-  url10: "https://icons.iconarchive.com/icons/hopstarter/office-2010/32/Microsoft-Office-One-Note-icon.png" ,
-  url11: "https://icons.iconarchive.com/icons/hopstarter/office-2010/32/Microsoft-Office-Publisher-icon.png" ,
-  url12: "https://icons.iconarchive.com/icons/hopstarter/office-2010/32/Microsoft-Office-Word-icon.png" ,
-  url13: "https://icons.iconarchive.com/icons/treetog/file-type/32/accdb-icon.png" ,
-  url14: "https://icons.iconarchive.com/icons/treetog/file-type/32/docx-win-icon.png" , 
-  url15: "https://icons.iconarchive.com/icons/treetog/file-type/32/pub-icon.png" ,
-  url16: "https://icons.iconarchive.com/icons/treetog/file-type/32/xlsx-win-icon.png" ,
-  url17: "https://icons.iconarchive.com/icons/icondrawer/black-and-blue-add-on/32/GarageBand-icon.png" , 
-  url18: "https://icons.iconarchive.com/icons/filetypeicons/filetype/32/html-icon.png" , 
-  url19: "https://icons.iconarchive.com/icons/dtafalonso/ios7-desktop/32/Notes-icon.png" , 
-  url20: "https://icons.iconarchive.com/icons/graphics-vibe/developer/32/css-icon.png" , 
-  url21: "https://icons.iconarchive.com/icons/graphics-vibe/developer/32/javascript-icon.png" ,
-  url22: "https://icons.iconarchive.com/icons/graphics-vibe/developer/32/html-icon.png" , 
+  url2: "https://icons.iconarchive.com/icons/fatcow/farm-fresh/32/file-extension-wps-icon.png", 
+  url3: "https://icons.iconarchive.com/icons/fatcow/farm-fresh/32/file-extension-xls-icon.png", 
+  url4: "https://icons.iconarchive.com/icons/fatcow/farm-fresh/32/page-add-icon.png", 
+  url5: "https://icons.iconarchive.com/icons/fatcow/farm-fresh/32/page-code-icon.png", 
+  url6: "https://icons.iconarchive.com/icons/fatcow/farm-fresh/32/page-white-excel-icon.png", 
+  url7: "https://icons.iconarchive.com/icons/fatcow/farm-fresh/32/page-white-word-icon.png", 
+  url8: "https://icons.iconarchive.com/icons/hopstarter/office-2010/32/Microsoft-Office-Access-icon.png", 
+  url9: "https://icons.iconarchive.com/icons/hopstarter/office-2010/32/Microsoft-Office-Excel-icon.png", 
+  url10: "https://icons.iconarchive.com/icons/hopstarter/office-2010/32/Microsoft-Office-One-Note-icon.png", 
+  url11: "https://icons.iconarchive.com/icons/hopstarter/office-2010/32/Microsoft-Office-Publisher-icon.png", 
+  url12: "https://icons.iconarchive.com/icons/hopstarter/office-2010/32/Microsoft-Office-Word-icon.png", 
+  url13: "https://icons.iconarchive.com/icons/treetog/file-type/32/accdb-icon.png", 
+  url14: "https://icons.iconarchive.com/icons/treetog/file-type/32/docx-win-icon.png", 
+  url15: "https://icons.iconarchive.com/icons/treetog/file-type/32/pub-icon.png", 
+  url16: "https://icons.iconarchive.com/icons/treetog/file-type/32/xlsx-win-icon.png", 
+  url17: "https://icons.iconarchive.com/icons/icondrawer/black-and-blue-add-on/32/GarageBand-icon.png", 
+  url18: "https://icons.iconarchive.com/icons/filetypeicons/filetype/32/html-icon.png", 
+  url19: "https://icons.iconarchive.com/icons/dtafalonso/ios7-desktop/32/Notes-icon.png", 
+  url20: "https://icons.iconarchive.com/icons/graphics-vibe/developer/32/css-icon.png", 
+  url21: "https://icons.iconarchive.com/icons/graphics-vibe/developer/32/javascript-icon.png", 
+  url22: "https://icons.iconarchive.com/icons/graphics-vibe/developer/32/html-icon.png", 
   url23: "https://icons.iconarchive.com/icons/treetog/file-type/32/css-icon.png" 
- 
-  // Tu peux rajouter tes autres URL d'images PNG ici de la même manière :
-  // url2: "https://raw.githubusercontent.com/.../icone2.png",
-  // url3: "https://raw.githubusercontent.com/.../icone3.png",
 };
 
 // Liste unique d'icônes partagée par les dossiers, sous-dossiers et notes
@@ -259,7 +250,6 @@ const iconOptionsList = [
   { type: 'emoji', value: '🔒' },
   { type: 'emoji', value: '🔓' },
   { type: 'emoji', value: '🔘' },
-  // Intégration des images PNG Web
   { type: 'png', key: 'url1', url: customPngIcons.url1 },
   { type: 'png', key: 'url2', url: customPngIcons.url2 },
   { type: 'png', key: 'url3', url: customPngIcons.url3 },
@@ -292,7 +282,7 @@ tree=document.getElementById("treeList"), titleInput=document.getElementById("no
 contentInput=document.getElementById("content"), lineNumbers=document.getElementById("lineNumbers"),
 toggleLinesBtn=document.getElementById("toggleLinesBtn"), contextMenu=document.getElementById("contextMenu");
 
-// Variables temporaires pour stocker l'icône sélectionnée dans les 3 modales
+// Variables temporaires pour stocker l'icône sélectionnée
 let tempSelectedIcons = { folder: 'emoji:📁', sub: 'emoji:📂', note: 'emoji:📝' };
 
 document.querySelectorAll(".modalBox").forEach(b => {b.onclick = e => e.stopPropagation();});
@@ -375,19 +365,7 @@ function iconHTML(i){
   return i.type === "note" ? "📝" : "📁";
 }
 
-// Génère la représentation visuelle pour le carré d'aperçu fixe
-function renderIconPreview(iconVal) {
-  if(!iconVal || iconVal === "none") return "🚫";
-  if(iconVal.startsWith("emoji:")) return iconVal.split(":")[1];
-  if(iconVal.startsWith("png:")) {
-    let url = customPngIcons[iconVal.split(":")[1]] || iconVal.replace("png:", "");
-    return `<img src="${url}" />`;
-  }
-  return "📁";
-}
-
-// Fonction générique pour construire le sélecteur d'icônes avec aperçu fixe
-// Fonction sans aperçu du haut
+// Fonction pour construire le sélecteur d'icônes
 function setupIconPicker(targetType, listElemId) {
   const scrollList = document.getElementById(listElemId);
   scrollList.innerHTML = "";
@@ -507,7 +485,7 @@ function openOptionsFor(item){
   if(item.type === "folder"){
     folderName.value = item.title; folderBgColor.value = item.bg||"#252526"; folderTextColor.value = item.color||"#fff";
     tempSelectedIcons.folder = item.icon || "emoji:📁";
-    setupIconPicker('folder', 'folderIconPreview', 'folderIconList');
+    setupIconPicker('folder', 'folderIconList');
     folderFont.value = item.font||"-apple-system"; folderSize.value = item.size||"14px";
     folderBold.checked = !!item.bold; folderItalic.checked = !!item.italic; folderUnderline.checked = !!item.underline;
     modal.style.display = "flex";
@@ -515,7 +493,7 @@ function openOptionsFor(item){
   else if(item.type === "subfolder"){
     subName.value = item.title; subBgColor.value = item.bg||"#252526"; subTextColor.value = item.color||"#fff";
     tempSelectedIcons.sub = item.icon || "emoji:📂";
-    setupIconPicker('sub', 'subIconPreview', 'subIconList');
+    setupIconPicker('sub', 'subIconList');
     subFont.value = item.font||"-apple-system"; subSize.value = item.size||"14px";
     subBold.checked = !!item.bold; subItalic.checked = !!item.italic; subUnderline.checked = !!item.underline;
     modalSub.style.display = "flex";
@@ -523,7 +501,7 @@ function openOptionsFor(item){
   else if(item.type === "note"){
     noteName.value = item.title; noteBgColor.value = item.bg||"#252526"; noteTextColor.value = item.color||"#fff";
     tempSelectedIcons.note = item.icon || "emoji:📝";
-    setupIconPicker('note', 'noteIconPreview', 'noteIconList');
+    setupIconPicker('note', 'noteIconList');
     noteFont.value = item.font||"-apple-system"; noteSize.value = item.size||"14px";
     noteBold.checked = !!item.bold; noteItalic.checked = !!item.italic; noteUnderline.checked = !!item.underline;
     modalNote.style.display = "flex";
@@ -534,7 +512,7 @@ addFolder.onclick = () => {
   folderName.value=""; menuTarget=null; folderFont.value="-apple-system"; folderSize.value="14px"; 
   folderBold.checked=false; folderItalic.checked=false; folderUnderline.checked=false; 
   tempSelectedIcons.folder = "emoji:📁";
-  setupIconPicker('folder', 'folderIconPreview', 'folderIconList');
+  setupIconPicker('folder', 'folderIconList');
   modal.style.display="flex"; 
 };
 cancelModal.onclick = () => modal.style.display="none";
@@ -551,7 +529,7 @@ addSubFolder.onclick = () => {
   subName.value=""; menuTarget=null; subFont.value="-apple-system"; subSize.value="14px"; 
   subBold.checked=false; subItalic.checked=false; subUnderline.checked=false; 
   tempSelectedIcons.sub = "emoji:📂";
-  setupIconPicker('sub', 'subIconPreview', 'subIconList');
+  setupIconPicker('sub', 'subIconList');
   modalSub.style.display="flex"; 
 };
 cancelModalSub.onclick = () => modalSub.style.display="none";
