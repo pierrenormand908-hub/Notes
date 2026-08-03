@@ -36,15 +36,36 @@ header{background:var(--bg2);padding:10px;display:flex;align-items:center;gap:10
 #contextMenu button:hover{background:var(--accent);color:#fff}
 .delete-option{color:#d33!important}
 
-#main{position:absolute;top:70px;left:0;right:0;bottom:0;transition:left .25s ease-in-out;display:flex;flex-direction:column}
-#editor-header{padding:10px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:center}
+#main{position:absolute;top:50px;left:0;right:0;bottom:0;transition:left .25s ease-in-out;display:flex;flex-direction:column}
+#editor-header{padding:8px 10px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:center}
 #node-title{flex:1;padding:8px;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:16px;}
 #toggleLinesBtn{padding:6px 12px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-weight:bold;font-size:14px;}
 #toggleLinesBtn.active{background:var(--accent);color:#fff}
 
+/* BARRE D'OUTILS COMPACTE */
+#toolbar{padding:6px 10px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.tb-group{display:flex;gap:4px;align-items:center}
+#toolbar button, #toolbar select, .color-btn-label{padding:6px 8px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:6px;font-size:14px;cursor:pointer;height:34px;box-sizing:border-box;display:flex;align-items:center;gap:4px}
+#toolbar button:active{background:var(--accent);color:#fff}
+
+.select-size-compact {
+  padding: 6px 2px 6px 6px !important;
+  width: auto !important;
+  min-width: 62px;
+  font-weight: bold;
+}
+
+.color-picker-wrapper{display:flex;align-items:center;gap:4px;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:2px 6px;height:34px;box-sizing:border-box;font-size:13px}
+.color-picker-wrapper input[type="color"]{width:26px;height:26px;border:none;background:none;cursor:pointer;padding:0}
+
 .editor-container{display:flex;flex:1;position:relative;overflow:hidden}
 #lineNumbers{width:45px;background:var(--linenum-bg);color:var(--linenum-color);font-family:monospace;font-size:14px;padding:12px 4px;text-align:right;user-select:none;overflow:hidden;box-sizing:border-box;display:none;line-height:1.5}
-#content{flex:1;background:var(--bg);color:var(--text);border:none;padding:12px;resize:none;box-sizing:border-box;font-size:14px;font-family:monospace;line-height:1.5;overflow-y:auto;white-space:pre-wrap;word-break:break-all}
+
+/* ZONE EDITEUR CONTENTEDITABLE */
+#content{flex:1;background:var(--bg);color:var(--text);border:none;padding:12px;box-sizing:border-box;font-size:14px;font-family:sans-serif;line-height:1.5;overflow-y:auto;outline:none}
+#content[placeholder]:empty:before { content: attr(placeholder); color: #888; }
+#content blockquote { border-left: 4px solid var(--accent); margin: 6px 0; padding-left: 10px; color: #777; font-style: italic; }
+
 #modal,#modalSub,#modalNote,#confirmDelete{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;justify-content:center;align-items:center;z-index:3000}
 .modalBox{background:var(--bg2);padding:20px;width:90%;max-width:320px;border-radius:10px;display:flex;flex-direction:column;gap:8px;max-height:90vh;overflow-y:auto}
 .modalBox input,.modalBox select{width:100%;padding:8px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);box-sizing:border-box;font-size:16px;}
@@ -56,7 +77,6 @@ header{background:var(--bg2);padding:10px;display:flex;align-items:center;gap:10
 .create-btn{background:var(--accent);color:#fff}.cancel-btn{background:#777;color:#fff}
 .icon-yellow{color:#fbc02d}
 
-/* Style du conteneur d'icônes */
 .icon-picker-section { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
 .icon-scroll-list { max-height: 120px; overflow-y: auto; border: 1px solid var(--border); border-radius: 6px; padding: 6px; background: var(--bg); display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
 .icon-option { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border: 1px solid transparent; border-radius: 4px; cursor: pointer; font-size: 20px; background: var(--bg2); }
@@ -173,14 +193,62 @@ header{background:var(--bg2);padding:10px;display:flex;align-items:center;gap:10
     <input id="node-title" placeholder="Titre">
     <button id="toggleLinesBtn" title="Afficher/Masquer les numéros de ligne">123</button>
   </div>
+
+  <div id="toolbar">
+    <div class="tb-group">
+      <button onmousedown="event.preventDefault(); execCmd('bold');" title="Gras"><b>B</b></button>
+      <button onmousedown="event.preventDefault(); execCmd('italic');" title="Italique"><i>I</i></button>
+      <button onmousedown="event.preventDefault(); execCmd('underline');" title="Souligné"><u>U</u></button>
+      <button onmousedown="event.preventDefault(); execCmd('strikeThrough');" title="Barré"><s>S</s></button>
+    </div>
+
+    <div class="tb-group">
+      <button onmousedown="event.preventDefault(); execCmd('insertUnorderedList');" title="Liste à puces">• Liste</button>
+      <button onmousedown="event.preventDefault(); execCmd('insertOrderedList');" title="Liste numérotée">1. Liste</button>
+      <button onmousedown="event.preventDefault(); execCmd('formatBlock', 'blockquote');" title="Citation">💬</button>
+      
+      <!-- SÉLECTEUR DE TAILLE COMPACT -->
+      <select class="select-size-compact" onchange="changeTextSize(this.value);" title="Taille du texte">
+        <option value="8pt">8pt</option>
+        <option value="9pt">9pt</option>
+        <option value="10pt">10pt</option>
+        <option value="11pt">11pt</option>
+        <option value="12pt" selected>12pt</option>
+        <option value="14pt">14pt</option>
+        <option value="16pt">16pt</option>
+        <option value="18pt">18pt</option>
+        <option value="20pt">20pt</option>
+        <option value="24pt">24pt</option>
+        <option value="28pt">28pt</option>
+        <option value="32pt">32pt</option>
+        <option value="36pt">36pt</option>
+      </select>
+    </div>
+
+    <div class="tb-group">
+      <button onmousedown="event.preventDefault(); execCmd('formatBlock', 'h1');" title="Grand Titre">H1</button>
+      <button onmousedown="event.preventDefault(); execCmd('formatBlock', 'h2');" title="Sous-titre">H2</button>
+      <button onmousedown="event.preventDefault(); addLink();" title="Insérer un lien">🔗</button>
+    </div>
+
+    <div class="tb-group">
+      <div class="color-picker-wrapper" title="Couleur du texte">
+        🎨 Texte <input type="color" id="textColorPicker" onchange="execCmd('foreColor', this.value)">
+      </div>
+      <div class="color-picker-wrapper" title="Surligner le texte">
+        🟡 Fond <input type="color" id="bgColorPicker" value="#ffff00" onchange="execCmd('hiliteColor', this.value)">
+      </div>
+      <button onmousedown="event.preventDefault(); execCmd('removeFormat');" title="Effacer tout le formatage">🧹</button>
+    </div>
+  </div>
+
   <div class="editor-container">
     <div id="lineNumbers"></div>
-    <textarea id="content" placeholder="Tape ta note ou colle ton code..."></textarea>
+    <div id="content" contenteditable="true" placeholder="Tape ta note ou colle ton texte..."></div>
   </div>
 </div>
 
 <script>
-// Dictionnaire d'icônes PNG utilisant des URL directes Web
 const customPngIcons = {
   url1: "https://icons.iconarchive.com/icons/fatcow/farm-fresh/32/file-extension-html-icon.png",
   url2: "https://icons.iconarchive.com/icons/fatcow/farm-fresh/32/file-extension-wps-icon.png", 
@@ -226,7 +294,6 @@ const customPngIcons = {
   url42: "https://icons.iconarchive.com/icons/hopstarter/soft-scraps/32/Folder-Generic-Silver-icon.png"
 };
 
-// Liste unique d'icônes partagée par les dossiers, sous-dossiers et notes
 const iconOptionsList = [
   { type: 'none', value: 'none', label: '❌' },
   { type: 'emoji', value: '📁' },
@@ -320,8 +387,68 @@ tree=document.getElementById("treeList"), titleInput=document.getElementById("no
 contentInput=document.getElementById("content"), lineNumbers=document.getElementById("lineNumbers"),
 toggleLinesBtn=document.getElementById("toggleLinesBtn"), contextMenu=document.getElementById("contextMenu");
 
-// Variables temporaires pour stocker l'icône sélectionnée
 let tempSelectedIcons = { folder: 'emoji:📁', sub: 'emoji:📂', note: 'emoji:📝' };
+
+function execCmd(command, value = null) {
+  document.execCommand(command, false, value);
+  contentInput.focus();
+  let i = items.find(x => x.id === currentId);
+  if(i){
+    i.content = contentInput.innerHTML;
+    save();
+    updateLineNumbers();
+  }
+}
+
+// FONCTION CORRIGÉE POUR ÉVITER LES SAUTS ET DÉCALAGES DE LIGNE
+function changeTextSize(sizePt) {
+  let sel = window.getSelection();
+  if (!sel.rangeCount || sel.isCollapsed) return;
+
+  let range = sel.getRangeAt(0);
+
+  // 1. Si la sélection est à l'intérieur d'un span de taille existant, on met à jour la taille directement
+  let parentSpan = range.commonAncestorContainer;
+  if (parentSpan.nodeType === 3) parentSpan = parentSpan.parentNode;
+
+  if (parentSpan && parentSpan.tagName === "SPAN" && parentSpan.style.fontSize) {
+    parentSpan.style.fontSize = sizePt;
+    parentSpan.style.lineHeight = "normal";
+  } else {
+    // 2. Sinon, on crée un span propre sans styles superflus
+    let span = document.createElement("span");
+    span.style.fontSize = sizePt;
+    span.style.lineHeight = "normal"; // Empêche le décalage vertical
+
+    try {
+      span.appendChild(range.extractContents());
+      range.insertNode(span);
+      
+      // Resélectionne proprement le texte
+      sel.removeAllRanges();
+      let newRange = document.createRange();
+      newRange.selectNodeContents(span);
+      sel.addRange(newRange);
+    } catch (e) {
+      document.execCommand("fontSize", false, "3");
+    }
+  }
+
+  contentInput.focus();
+  let i = items.find(x => x.id === currentId);
+  if(i){
+    i.content = contentInput.innerHTML;
+    save();
+    updateLineNumbers();
+  }
+}
+
+function addLink() {
+  let url = prompt("Entrez l'adresse Web (URL) :", "https://");
+  if (url) {
+    execCmd("createLink", url);
+  }
+}
 
 document.querySelectorAll(".modalBox").forEach(b => {b.onclick = e => e.stopPropagation();});
 
@@ -330,7 +457,7 @@ closeBtn.onclick = () => { sidebar.classList.remove("open"); toggleBtn.textConte
 
 function updateLineNumbers(){
   if(!showLines) return;
-  const lines = contentInput.value.split("\n").length;
+  const lines = (contentInput.innerText || contentInput.textContent).split("\n").length;
   let html = "";
   for(let i = 1; i <= lines; i++) { html += i + "<br>"; }
   lineNumbers.innerHTML = html;
@@ -360,7 +487,6 @@ function load(){
 }
 function save(){ localStorage.setItem(KEY, JSON.stringify(items)); }
 
-// Enregistrer l'arbre (Export JSON)
 document.getElementById("exportBtn").onclick = () => {
   let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(items, null, 2));
   let dlAnchorElem = document.createElement('a');
@@ -371,7 +497,6 @@ document.getElementById("exportBtn").onclick = () => {
   dlAnchorElem.remove();
 };
 
-// Restaurer l'arbre (Import JSON)
 document.getElementById("importBtn").onclick = () => { document.getElementById("importFile").click(); };
 document.getElementById("importFile").onchange = (e) => {
   let file = e.target.files[0];
@@ -403,7 +528,6 @@ function iconHTML(i){
   return i.type === "note" ? "📝" : "📁";
 }
 
-// Fonction pour construire le sélecteur d'icônes
 function setupIconPicker(targetType, listElemId) {
   const scrollList = document.getElementById(listElemId);
   scrollList.innerHTML = "";
@@ -492,22 +616,22 @@ function loadCurrent(){
   let i = items.find(x => x.id === currentId); 
   if(i){ 
     titleInput.value = i.title; 
-    contentInput.value = i.content || ""; 
+    contentInput.innerHTML = i.content || ""; 
     updateLineNumbers();
   } 
 }
 
 titleInput.oninput = () => { let i = items.find(x => x.id === currentId); if(i){ i.title = titleInput.value; save(); render(); } };
+
 contentInput.oninput = () => { 
   let i = items.find(x => x.id === currentId); 
   if(i){ 
-    i.content = contentInput.value; 
+    i.content = contentInput.innerHTML; 
     save(); 
     updateLineNumbers();
   } 
 };
 
-/* GESTION MENU CONTEXTUEL */
 ctxOptions.onclick = () => { openOptionsFor(menuTarget); };
 ctxDelete.onclick = () => {
   delName.textContent = "Supprimer : " + menuTarget.title;
@@ -595,6 +719,21 @@ saveNoteOpt.onclick = () => {
   }
   modalNote.style.display="none";
 };
+// GESTION DU COLLAGE AVEC CONSERVATION DES COULEURS / HTML
+contentInput.addEventListener("paste", function(e) {
+  let html = e.clipboardData.getData("text/html");
 
+  if (html) {
+    e.preventDefault();
+    document.execCommand("insertHTML", false, html);
+
+    let i = items.find(x => x.id === currentId);
+    if (i) {
+      i.content = contentInput.innerHTML;
+      save();
+      updateLineNumbers();
+    }
+  }
+});
 load();
 </script></body></html>
