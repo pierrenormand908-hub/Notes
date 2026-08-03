@@ -37,10 +37,20 @@ header{background:var(--bg2);padding:10px;display:flex;align-items:center;gap:10
 .delete-option{color:#d33!important}
 
 #main{position:absolute;top:50px;left:0;right:0;bottom:0;transition:left .25s ease-in-out;display:flex;flex-direction:column}
-#editor-header{padding:8px 10px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:center}
-#node-title{flex:1;padding:8px;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:16px;}
-#toggleLinesBtn{padding:6px 12px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-weight:bold;font-size:14px;}
+#editor-header{padding:8px 10px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;gap:6px;align-items:center}
+
+/* RECTANGLE TITRE & SÉLECTEUR DE POLICE ADAPTÉ IPHONE */
+#node-title{flex:1; min-width:80px; max-width:220px; padding:8px;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:16px;}
+#fontFamilySelect{padding:6px 4px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:6px;font-size:13px;cursor:pointer;height:36px;box-sizing:border-box; max-width:120px; text-overflow:ellipsis;}
+
+#toggleLinesBtn{padding:6px 10px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-weight:bold;font-size:14px;flex-shrink:0;}
 #toggleLinesBtn.active{background:var(--accent);color:#fff}
+
+@media(max-width: 480px) {
+  #node-title { max-width: 190px; }
+  #fontFamilySelect { max-width: 105px; font-size: 12px; padding: 6px 2px; }
+  #editor-header { gap: 4px; padding: 6px; }
+}
 
 /* BARRE D'OUTILS COMPACTE */
 #toolbar{padding:6px 10px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:6px;align-items:center}
@@ -191,6 +201,25 @@ header{background:var(--bg2);padding:10px;display:flex;align-items:center;gap:10
 <div id="main">
   <div id="editor-header">
     <input id="node-title" placeholder="Titre">
+    
+    <select id="fontFamilySelect" onchange="execCmd('fontName', this.value)" title="Changer la police de caractères">
+      <option value="-apple-system" selected>Police</option>
+      <option value="Arial">Arial</option>
+      <option value="Arial Black">Arial Black</option>
+      <option value="Comic Sans MS">Comic Sans</option>
+      <option value="Consolas">Consolas</option>
+      <option value="Courier New">Courier</option>
+      <option value="Georgia">Georgia</option>
+      <option value="Impact">Impact</option>
+      <option value="Lucida Console">Lucida</option>
+      <option value="Monaco">Monaco</option>
+      <option value="Segoe UI">Segoe UI</option>
+      <option value="Tahoma">Tahoma</option>
+      <option value="Times New Roman">Times</option>
+      <option value="Trebuchet MS">Trebuchet</option>
+      <option value="Verdana">Verdana</option>
+    </select>
+
     <button id="toggleLinesBtn" title="Afficher/Masquer les numéros de ligne">123</button>
   </div>
 
@@ -207,7 +236,6 @@ header{background:var(--bg2);padding:10px;display:flex;align-items:center;gap:10
       <button onmousedown="event.preventDefault(); execCmd('insertOrderedList');" title="Liste numérotée">1. Liste</button>
       <button onmousedown="event.preventDefault(); execCmd('formatBlock', 'blockquote');" title="Citation">💬</button>
       
-      <!-- SÉLECTEUR DE TAILLE COMPACT -->
       <select class="select-size-compact" onchange="changeTextSize(this.value);" title="Taille du texte">
         <option value="8pt">8pt</option>
         <option value="9pt">9pt</option>
@@ -400,14 +428,12 @@ function execCmd(command, value = null) {
   }
 }
 
-// FONCTION CORRIGÉE POUR ÉVITER LES SAUTS ET DÉCALAGES DE LIGNE
 function changeTextSize(sizePt) {
   let sel = window.getSelection();
   if (!sel.rangeCount || sel.isCollapsed) return;
 
   let range = sel.getRangeAt(0);
 
-  // 1. Si la sélection est à l'intérieur d'un span de taille existant, on met à jour la taille directement
   let parentSpan = range.commonAncestorContainer;
   if (parentSpan.nodeType === 3) parentSpan = parentSpan.parentNode;
 
@@ -415,16 +441,14 @@ function changeTextSize(sizePt) {
     parentSpan.style.fontSize = sizePt;
     parentSpan.style.lineHeight = "normal";
   } else {
-    // 2. Sinon, on crée un span propre sans styles superflus
     let span = document.createElement("span");
     span.style.fontSize = sizePt;
-    span.style.lineHeight = "normal"; // Empêche le décalage vertical
+    span.style.lineHeight = "normal";
 
     try {
       span.appendChild(range.extractContents());
       range.insertNode(span);
       
-      // Resélectionne proprement le texte
       sel.removeAllRanges();
       let newRange = document.createRange();
       newRange.selectNodeContents(span);
@@ -719,21 +743,6 @@ saveNoteOpt.onclick = () => {
   }
   modalNote.style.display="none";
 };
-// GESTION DU COLLAGE AVEC CONSERVATION DES COULEURS / HTML
-contentInput.addEventListener("paste", function(e) {
-  let html = e.clipboardData.getData("text/html");
 
-  if (html) {
-    e.preventDefault();
-    document.execCommand("insertHTML", false, html);
-
-    let i = items.find(x => x.id === currentId);
-    if (i) {
-      i.content = contentInput.innerHTML;
-      save();
-      updateLineNumbers();
-    }
-  }
-});
 load();
 </script></body></html>
