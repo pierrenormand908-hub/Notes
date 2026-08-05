@@ -11,10 +11,22 @@
       touch-action: manipulation;
   }
 :root{--accent:#3a8fd0;--bg:#f5f7fa;--bg2:#e9eef5;--text:#222;--border:#c8d3e0;--linenum-bg:#e1e6ed;--linenum-color:#8892a0}
-@media(prefers-color-scheme:dark){:root{--bg:#1e1e1e;--bg2:#252526;--text:#fff;--border:#333;--accent:#3a8fd0;--linenum-bg:#2d2d2d;--linenum-color:#858585}}
+
+/* THÈMES MANUELS */
+body.light-theme {--bg:#f5f7fa;--bg2:#e9eef5;--text:#222;--border:#c8d3e0;--accent:#3a8fd0;--linenum-bg:#e1e6ed;--linenum-color:#8892a0}
+body.dark-theme {--bg:#1e1e1e;--bg2:#252526;--text:#fff;--border:#333;--accent:#3a8fd0;--linenum-bg:#2d2d2d;--linenum-color:#858585}
+
+@media(prefers-color-scheme:dark){
+  :root{--bg:#1e1e1e;--bg2:#252526;--text:#fff;--border:#333;--accent:#3a8fd0;--linenum-bg:#2d2d2d;--linenum-color:#858585}
+}
+
 body{margin:0;font-family:-apple-system;background:var(--bg);color:var(--text);height:100vh;overflow:hidden}
 header{background:var(--bg2);padding:10px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);height:50px;box-sizing:border-box}
 #toggleSidebar{font-size:18px;padding:6px 12px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:6px;cursor:pointer}
+
+/* BOUTON THÈME */
+#themeToggleBtn{padding:6px 10px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center}
+
 #sidebar{position:fixed;top:0;left:0;width:260px;height:100vh;background:var(--bg2);border-right:1px solid var(--border);padding:10px;z-index:999;display:flex;flex-direction:column;transform:translateX(-280px);transition:.25s ease-in-out;box-sizing:border-box}
 #sidebar.open{transform:translateX(0)}
 .sidebar-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
@@ -96,7 +108,11 @@ header{background:var(--bg2);padding:10px;display:flex;align-items:center;gap:10
 </head>
 <body>
 
-<header><button id="toggleSidebar">▶</button><h1>Notes</h1></header>
+<header>
+  <button id="toggleSidebar">▶</button>
+  <h1 style="margin:0;">Notes</h1>
+  <button id="themeToggleBtn" title="Changer le mode (Clair / Sombre)">🌙</button>
+</header>
 
 <div id="sidebar">
   <div class="sidebar-header">
@@ -204,22 +220,16 @@ header{background:var(--bg2);padding:10px;display:flex;align-items:center;gap:10
     
     <select id="fontFamilySelect" onchange="execCmd('fontName', this.value)" title="Changer la police de caractères">
       <option value="-apple-system" selected>Police</option>
-      <option value="Apple Color Emoji">Apple Color Emoji</option>
       <option value="Arial">Arial</option>
       <option value="Arial Black">Arial Black</option>
-      <option value="Arial Narrow">Arial Narrow</option>
-      <option value="Cambria">Cambria</option>
       <option value="Comic Sans MS">Comic Sans</option>
       <option value="Consolas">Consolas</option>
       <option value="Courier New">Courier</option>
       <option value="Georgia">Georgia</option>
-      <option value="Hiragino Mincho ProN">Hiragino Mincho</option>
       <option value="Impact">Impact</option>
       <option value="Lucida Console">Lucida</option>
       <option value="Monaco">Monaco</option>
-      <option value="Noteworthy">Noteworthy</option>
       <option value="Segoe UI">Segoe UI</option>
-      <option value="Snell Roundhand">Snell Roundhand</option>
       <option value="Tahoma">Tahoma</option>
       <option value="Times New Roman">Times</option>
       <option value="Trebuchet MS">Trebuchet</option>
@@ -420,6 +430,45 @@ toggleBtn=document.getElementById("toggleSidebar"), closeBtn=document.getElement
 tree=document.getElementById("treeList"), titleInput=document.getElementById("node-title"),
 contentInput=document.getElementById("content"), lineNumbers=document.getElementById("lineNumbers"),
 toggleLinesBtn=document.getElementById("toggleLinesBtn"), contextMenu=document.getElementById("contextMenu");
+
+let themeToggleBtn = document.getElementById("themeToggleBtn");
+
+/* GESTION DU MODE CLAIR / SOMBRE */
+function applyStoredTheme() {
+  let savedTheme = localStorage.getItem("app_theme");
+  if (savedTheme === "light") {
+    document.body.classList.add("light-theme");
+    document.body.classList.remove("dark-theme");
+    themeToggleBtn.textContent = "☀️";
+  } else if (savedTheme === "dark") {
+    document.body.classList.add("dark-theme");
+    document.body.classList.remove("light-theme");
+    themeToggleBtn.textContent = "🌙";
+  } else {
+    // Par défaut bascule selon la préférence du système s'il n'y a rien de sauvé
+    let isSystemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    themeToggleBtn.textContent = isSystemDark ? "🌙" : "☀️";
+  }
+}
+
+themeToggleBtn.onclick = () => {
+  let isDark = document.body.classList.contains("dark-theme") || 
+               (!document.body.classList.contains("light-theme") && window.matchMedia("(prefers-color-scheme: dark)").matches);
+
+  if (isDark) {
+    document.body.classList.add("light-theme");
+    document.body.classList.remove("dark-theme");
+    localStorage.setItem("app_theme", "light");
+    themeToggleBtn.textContent = "☀️";
+  } else {
+    document.body.classList.add("dark-theme");
+    document.body.classList.remove("light-theme");
+    localStorage.setItem("app_theme", "dark");
+    themeToggleBtn.textContent = "🌙";
+  }
+};
+
+applyStoredTheme();
 
 let tempSelectedIcons = { folder: 'emoji:📁', sub: 'emoji:📂', note: 'emoji:📝' };
 
