@@ -24,10 +24,9 @@ body{margin:0;font-family:-apple-system;background:var(--bg);color:var(--text);h
 header{background:var(--bg2);padding:10px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);height:50px;box-sizing:border-box}
 header h1{margin:0;font-size:20px;flex-grow:1}
 
-/* Marge à droite augmentée pour décaler le bouton vers la gauche */
-.theme-toggle-group{display:flex;align-items:center;margin-left:auto;margin-right:25px}
+.theme-toggle-group{display:flex;gap:10px;align-items:center;margin-left:auto;margin-right:5px}
 .theme-btn{background:var(--bg);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:6px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center}
-.theme-btn:active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.theme-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
 
 #toggleSidebar{font-size:18px;padding:6px 12px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:6px;cursor:pointer}
 #sidebar{position:fixed;top:0;left:0;width:260px;height:100vh;background:var(--bg2);border-right:1px solid var(--border);padding:10px;z-index:999;display:flex;flex-direction:column;transform:translateX(-280px);transition:.25s ease-in-out;box-sizing:border-box}
@@ -73,6 +72,13 @@ header h1{margin:0;font-size:20px;flex-grow:1}
 #toolbar button, #toolbar select, .color-btn-label{padding:6px 8px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:6px;font-size:14px;cursor:pointer;height:34px;box-sizing:border-box;display:flex;align-items:center;gap:4px}
 #toolbar button:active{background:var(--accent);color:#fff}
 
+/* BOUTONS D'ÉDITION ACTIFS EN BLEU */
+#toolbar button.active {
+  background: var(--accent) !important;
+  color: #ffffff !important;
+  border-color: var(--accent) !important;
+}
+
 .select-size-compact {
   padding: 6px 2px 6px 6px !important;
   width: auto !important;
@@ -115,7 +121,8 @@ header h1{margin:0;font-size:20px;flex-grow:1}
   <button id="toggleSidebar">▶</button>
   <h1>Notes</h1>
   <div class="theme-toggle-group">
-    <button class="theme-btn" id="themeToggleBtn" onclick="toggleTheme()" title="Changer le thème">🌙</button>
+    <button class="theme-btn" id="lightThemeBtn" onclick="setTheme('light')" title="Mode Clair">☀️</button>
+    <button class="theme-btn" id="darkThemeBtn" onclick="setTheme('dark')" title="Mode Sombre">🌙</button>
   </div>
 </header>
 
@@ -252,10 +259,10 @@ header h1{margin:0;font-size:20px;flex-grow:1}
 
   <div id="toolbar">
     <div class="tb-group">
-      <button onmousedown="event.preventDefault(); execCmd('bold');" title="Gras"><b>B</b></button>
-      <button onmousedown="event.preventDefault(); execCmd('italic');" title="Italique"><i>I</i></button>
-      <button onmousedown="event.preventDefault(); execCmd('underline');" title="Souligné"><u>U</u></button>
-      <button onmousedown="event.preventDefault(); execCmd('strikeThrough');" title="Barré"><s>S</s></button>
+      <button id="btn-bold" onmousedown="event.preventDefault(); execCmd('bold');" title="Gras"><b>B</b></button>
+      <button id="btn-italic" onmousedown="event.preventDefault(); execCmd('italic');" title="Italique"><i>I</i></button>
+      <button id="btn-underline" onmousedown="event.preventDefault(); execCmd('underline');" title="Souligné"><u>U</u></button>
+      <button id="btn-strike" onmousedown="event.preventDefault(); execCmd('strikeThrough');" title="Barré"><s>S</s></button>
     </div>
 
     <div class="tb-group">
@@ -446,7 +453,8 @@ let tempSelectedIcons = { folder: 'emoji:📁', sub: 'emoji:📂', note: 'emoji:
 
 function setTheme(mode) {
   const root = document.documentElement;
-  const themeBtn = document.getElementById('themeToggleBtn');
+  document.getElementById('lightThemeBtn').classList.remove('active');
+  document.getElementById('darkThemeBtn').classList.remove('active');
 
   if(mode === 'light') {
     root.style.setProperty('--bg', '#f5f7fa');
@@ -455,8 +463,7 @@ function setTheme(mode) {
     root.style.setProperty('--border', '#c8d3e0');
     root.style.setProperty('--linenum-bg', '#e1e6ed');
     root.style.setProperty('--linenum-color', '#8892a0');
-    themeBtn.textContent = '🌙';
-    themeBtn.title = 'Passer au mode sombre';
+    document.getElementById('lightThemeBtn').classList.add('active');
   } else {
     root.style.setProperty('--bg', '#1e1e1e');
     root.style.setProperty('--bg2', '#252526');
@@ -464,15 +471,9 @@ function setTheme(mode) {
     root.style.setProperty('--border', '#333333');
     root.style.setProperty('--linenum-bg', '#2d2d2d');
     root.style.setProperty('--linenum-color', '#858585');
-    themeBtn.textContent = '☀️';
-    themeBtn.title = 'Passer au mode clair';
+    document.getElementById('darkThemeBtn').classList.add('active');
   }
   localStorage.setItem('notes_theme', mode);
-}
-
-function toggleTheme() {
-  const currentTheme = localStorage.getItem('notes_theme') || 'dark';
-  setTheme(currentTheme === 'dark' ? 'light' : 'dark');
 }
 
 function initTheme() {
@@ -480,9 +481,22 @@ function initTheme() {
   setTheme(savedTheme);
 }
 
+function updateToolbarState() {
+  const btnBold = document.getElementById("btn-bold");
+  const btnItalic = document.getElementById("btn-italic");
+  const btnUnderline = document.getElementById("btn-underline");
+  const btnStrike = document.getElementById("btn-strike");
+
+  if (btnBold) btnBold.classList.toggle("active", document.queryCommandState("bold"));
+  if (btnItalic) btnItalic.classList.toggle("active", document.queryCommandState("italic"));
+  if (btnUnderline) btnUnderline.classList.toggle("active", document.queryCommandState("underline"));
+  if (btnStrike) btnStrike.classList.toggle("active", document.queryCommandState("strikeThrough"));
+}
+
 function execCmd(command, value = null) {
   document.execCommand(command, false, value);
   contentInput.focus();
+  updateToolbarState();
   let i = items.find(x => x.id === currentId);
   if(i){
     i.content = contentInput.innerHTML;
@@ -490,6 +504,15 @@ function execCmd(command, value = null) {
     updateLineNumbers();
   }
 }
+
+document.addEventListener("selectionchange", () => {
+  if (document.activeElement === contentInput) {
+    updateToolbarState();
+  }
+});
+
+contentInput.addEventListener("keyup", updateToolbarState);
+contentInput.addEventListener("mouseup", updateToolbarState);
 
 function changeTextSize(sizePt) {
   let sel = window.getSelection();
@@ -706,6 +729,7 @@ function loadCurrent(){
     titleInput.value = i.title; 
     contentInput.innerHTML = i.content || ""; 
     updateLineNumbers();
+    updateToolbarState();
   } 
 }
 
