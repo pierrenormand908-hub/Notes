@@ -103,6 +103,15 @@ header h1 { margin: 0; font-size: 20px; flex-grow: 1; }
   flex-shrink: 0;
 }
 
+/* MODE COMPACT : actif pendant l'écriture (clavier ouvert) pour laisser le          */
+/* moins de hauteur possible à iOS, qui sinon pousse la barre d'outils hors de l'écran */
+#expandToolbarBtn { display: none; }
+.editor-topbar.compact #editor-header { display: none; }
+.editor-topbar.compact #toolbar .tb-group:not(.tb-primary) { display: none; }
+.editor-topbar.compact #expandToolbarBtn { display: flex; }
+.editor-topbar.compact.expanded #editor-header,
+.editor-topbar.compact.expanded #toolbar .tb-group { display: flex; }
+
 #editor-header {
   padding: 8px 10px;
   background: var(--bg2);
@@ -355,11 +364,12 @@ header h1 { margin: 0; font-size: 20px; flex-grow: 1; }
       </div>
 
       <div id="toolbar">
-        <div class="tb-group">
+        <div class="tb-group tb-primary">
           <button class="toolbar-toggle" data-cmd="bold" onmousedown="event.preventDefault(); execCmd('bold');" title="Gras"><b>B</b></button>
           <button class="toolbar-toggle" data-cmd="italic" onmousedown="event.preventDefault(); execCmd('italic');" title="Italique"><i>I</i></button>
           <button class="toolbar-toggle" data-cmd="underline" onmousedown="event.preventDefault(); execCmd('underline');" title="Souligné"><u>U</u></button>
           <button class="toolbar-toggle" data-cmd="strikeThrough" onmousedown="event.preventDefault(); execCmd('strikeThrough');" title="Barré"><s>S</s></button>
+          <button id="expandToolbarBtn" onmousedown="event.preventDefault(); document.querySelector('.editor-topbar').classList.toggle('expanded');" title="Plus d'outils">⋯</button>
         </div>
 
         <div class="tb-group">
@@ -698,6 +708,16 @@ contentInput.addEventListener("keyup", updateToolbarState);
 contentInput.addEventListener("mouseup", updateToolbarState);
 contentInput.addEventListener("touchend", updateToolbarState);
 contentInput.addEventListener("focus", updateToolbarState);
+
+/* ===== MODE COMPACT DE LA BARRE D'OUTILS PENDANT L'ÉCRITURE (clavier ouvert) ===== */
+const editorTopbar = document.querySelector(".editor-topbar");
+contentInput.addEventListener("focus", () => {
+  editorTopbar.classList.add("compact");
+});
+contentInput.addEventListener("blur", () => {
+  editorTopbar.classList.remove("compact");
+  editorTopbar.classList.remove("expanded");
+});
 
 
 
