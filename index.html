@@ -720,7 +720,6 @@ if (window.visualViewport) {
     // On applique le décalage inverse pour que l'app reste visuellement à sa place.
     const offset = vv.offsetTop || 0;
     appRoot.style.transform = offset ? `translateY(${offset}px)` : "";
-    appRoot.style.height = vv.height + "px";
   }
   vv.addEventListener("resize", compensateKeyboardPan);
   vv.addEventListener("scroll", compensateKeyboardPan);
