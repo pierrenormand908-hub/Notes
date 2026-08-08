@@ -686,6 +686,30 @@ document.querySelector('.editor-container').onscroll = function() {
   if(showLines) lineNumbers.scrollTop = this.scrollTop;
 };
 
+/* ===== PANNEAU DE DIAGNOSTIC TEMPORAIRE (à retirer une fois le bug résolu) ===== */
+(function(){
+  const dbg = document.createElement("div");
+  dbg.style.cssText = "position:fixed;left:4px;bottom:4px;z-index:99999;background:rgba(0,0,0,.75);color:#0f0;font:10px monospace;padding:4px 6px;border-radius:4px;pointer-events:none;white-space:pre;max-width:90vw;";
+  document.body.appendChild(dbg);
+  function paint(){
+    const vv = window.visualViewport;
+    dbg.textContent =
+      "innerH:" + window.innerHeight +
+      " vvH:" + (vv ? Math.round(vv.height) : "n/a") +
+      " vvTop:" + (vv ? Math.round(vv.offsetTop) : "n/a") +
+      " winScrollY:" + window.scrollY +
+      " bodyScrollTop:" + document.body.scrollTop;
+  }
+  paint();
+  window.addEventListener("resize", paint);
+  window.addEventListener("scroll", paint, {passive:true});
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener("resize", paint);
+    window.visualViewport.addEventListener("scroll", paint);
+  }
+  setInterval(paint, 500);
+})();
+
 /* ===== ÉTAT ACTIF DES BOUTONS DE LA BARRE D'OUTILS (gras, italique, etc.) ===== */
 const toolbarToggleBtns = document.querySelectorAll(".toolbar-toggle");
 
@@ -710,17 +734,7 @@ contentInput.addEventListener("mouseup", updateToolbarState);
 contentInput.addEventListener("touchend", updateToolbarState);
 contentInput.addEventListener("focus", updateToolbarState);
 
-/* ===== FIX iOS : adapte la hauteur réelle de l'app à la zone visible ===== */
-/* ===== (hors clavier) en mode standalone, sans toucher à html/body      ===== */
-if (window.visualViewport) {
-  const vv = window.visualViewport;
-  const appRoot = document.querySelector(".app-container");
-  function compensateKeyboardPan(){
-    appRoot.style.height = vv.height + "px";
-  }
-  vv.addEventListener("resize", compensateKeyboardPan);
-  compensateKeyboardPan();
-}
+
 
 
 
