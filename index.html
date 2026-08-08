@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Notes</title>
 <link rel="apple-touch-icon" href="Notes.png">
 <style>
@@ -20,7 +20,7 @@
   --linenum-color:#8892a0;
 }
 
-/* VERROUILLAGE DE L'ÉCRAN GLOBAL */
+/* VERROUILLAGE TOTAL DE LA PAGE (EMPÊCHE LE BOUNCE IOS) */
 html, body {
   margin: 0;
   padding: 0;
@@ -29,9 +29,10 @@ html, body {
   color: var(--text);
   height: 100dvh;
   width: 100vw;
-  overflow: hidden; /* Interdit le défilement de la page */
-  display: flex;
-  flex-direction: column;
+  overflow: hidden;
+  position: fixed; /* Bloque le défilement de la page entière */
+  top: 0;
+  left: 0;
 }
 
 header {
@@ -43,7 +44,6 @@ header {
   border-bottom: 1px solid var(--border);
   height: 50px;
   box-sizing: border-box;
-  flex-shrink: 0; /* Toujours fixe */
 }
 header h1 { margin: 0; font-size: 20px; flex-grow: 1; }
 
@@ -73,14 +73,16 @@ header h1 { margin: 0; font-size: 20px; flex-grow: 1; }
 #contextMenu button:hover { background: var(--accent); color: #fff; }
 .delete-option { color: #d33!important; }
 
-/* CONTENEUR PRINCIPAL VERROUILLÉ EN HAUTEUR */
+/* CONTENEUR PRINCIPAL RIGIDE */
 #main {
-  flex: 1;
+  position: absolute;
+  top: 50px; /* Commence sous le header */
+  bottom: 0;
+  left: 0;
+  right: 0;
   display: flex;
   flex-direction: column;
-  overflow: hidden; /* Empêche le conteneur global de défiler */
-  position: relative;
-  height: calc(100dvh - 50px); /* Hauteur fixe sous le header */
+  overflow: hidden;
 }
 
 #editor-header {
@@ -90,7 +92,7 @@ header h1 { margin: 0; font-size: 20px; flex-grow: 1; }
   display: flex;
   gap: 6px;
   align-items: center;
-  flex-shrink: 0; /* Ne monte jamais */
+  flex-shrink: 0;
 }
 
 #node-title { flex: 1; min-width: 80px; max-width: 220px; padding: 8px; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; color: var(--text); font-size: 16px; }
@@ -114,7 +116,7 @@ header h1 { margin: 0; font-size: 20px; flex-grow: 1; }
   flex-wrap: wrap;
   gap: 6px;
   align-items: center;
-  flex-shrink: 0; /* Ne monte jamais */
+  flex-shrink: 0;
 }
 .tb-group { display: flex; gap: 4px; align-items: center; }
 #toolbar button, #toolbar select, .color-btn-label { padding: 6px 8px; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 6px; font-size: 14px; cursor: pointer; height: 34px; box-sizing: border-box; display: flex; align-items: center; gap: 4px; }
@@ -130,14 +132,24 @@ header h1 { margin: 0; font-size: 20px; flex-grow: 1; }
 .color-picker-wrapper { display: flex; align-items: center; gap: 4px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 2px 6px; height: 34px; box-sizing: border-box; font-size: 13px; }
 .color-picker-wrapper input[type="color"] { width: 26px; height: 26px; border: none; background: none; cursor: pointer; padding: 0; }
 
-/* SEULE CETTE ZONE DE TEXTE PEUT DÉFILER */
-.editor-container {
-  display: flex;
-  flex: 1;
-  min-height: 0; /* Requis pour WebKit/Safari iOS pour limiter le flex */
+/* CONTENEUR DE L'ÉDITEUR ISOLÉ EN POSITION ABSOLUE */
+.editor-wrapper {
   position: relative;
-  overflow-y: auto; /* Active le défilement ici uniquement */
+  flex: 1;
+  width: 100%;
+  overflow: hidden;
+}
+
+.editor-container {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  overflow-y: auto; /* Seule cette boîte défile */
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain; /* Empêche le défilement de se propager au haut de la page */
 }
 
 #lineNumbers {
@@ -155,13 +167,13 @@ header h1 { margin: 0; font-size: 20px; flex-grow: 1; }
   line-height: 1.5;
 }
 
-/* MARGES EXTÉRIEURES POUR FACILITER LA SAISIE ET LE COLLAGE */
+/* MARGES DE LA ZONE DE TEXTE */
 #content {
   flex: 1;
   background: var(--bg);
   color: var(--text);
   border: none;
-  padding: 16px 24px; /* Marges intérieures confortables (Haut/Bas 16px, Gauche/Droite 24px) */
+  padding: 16px 24px;
   box-sizing: border-box;
   font-size: 14px;
   font-family: sans-serif;
@@ -382,9 +394,11 @@ header h1 { margin: 0; font-size: 20px; flex-grow: 1; }
     </div>
   </div>
 
-  <div class="editor-container">
-    <div id="lineNumbers"></div>
-    <div id="content" contenteditable="true" placeholder="Tape ta note ou colle ton texte..."></div>
+  <div class="editor-wrapper">
+    <div class="editor-container">
+      <div id="lineNumbers"></div>
+      <div id="content" contenteditable="true" placeholder="Tape ta note ou colle ton texte..."></div>
+    </div>
   </div>
 </div>
 
