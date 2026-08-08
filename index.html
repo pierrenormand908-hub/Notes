@@ -699,6 +699,7 @@ function updateToolbarState(){
 }
 
 document.addEventListener("selectionchange", () => {
+  // Ne met à jour que si la sélection est bien dans la zone de note
   const sel = window.getSelection();
   if (sel.rangeCount && contentInput.contains(sel.getRangeAt(0).commonAncestorContainer)) {
     updateToolbarState();
@@ -708,6 +709,28 @@ contentInput.addEventListener("keyup", updateToolbarState);
 contentInput.addEventListener("mouseup", updateToolbarState);
 contentInput.addEventListener("touchend", updateToolbarState);
 contentInput.addEventListener("focus", updateToolbarState);
+
+/* ===== FIX iOS : empêche Safari de faire défiler toute la page          ===== */
+/* ===== (et donc l'en-tête + la barre d'outils) quand le clavier s'ouvre ===== */
+function pinPage(){
+  if (window.scrollX !== 0 || window.scrollY !== 0) window.scrollTo(0, 0);
+  if (document.body.scrollTop !== 0) document.body.scrollTop = 0;
+  if (document.documentElement.scrollTop !== 0) document.documentElement.scrollTop = 0;
+}
+window.addEventListener("scroll", pinPage, {passive:true});
+
+if (window.visualViewport) {
+  const vv = window.visualViewport;
+  function syncViewport(){
+    // Cale la hauteur réelle de la page sur la zone visible (hors clavier)
+    document.documentElement.style.height = vv.height + "px";
+    document.body.style.height = vv.height + "px";
+    pinPage();
+  }
+  vv.addEventListener("resize", syncViewport);
+  vv.addEventListener("scroll", pinPage);
+  syncViewport();
+}
 
 function load(){
   initTheme();
