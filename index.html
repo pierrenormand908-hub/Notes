@@ -684,6 +684,28 @@ document.querySelector('.editor-container').onscroll = function() {
   if(showLines) lineNumbers.scrollTop = this.scrollTop;
 };
 
+/* ===== FIX iOS : empêche Safari de faire défiler toute la page          ===== */
+/* ===== (et donc l'en-tête + la barre d'outils) quand le clavier s'ouvre ===== */
+function pinPage(){
+  if (window.scrollX !== 0 || window.scrollY !== 0) window.scrollTo(0, 0);
+  if (document.body.scrollTop !== 0) document.body.scrollTop = 0;
+  if (document.documentElement.scrollTop !== 0) document.documentElement.scrollTop = 0;
+}
+window.addEventListener("scroll", pinPage, {passive:true});
+
+if (window.visualViewport) {
+  const vv = window.visualViewport;
+  function syncViewport(){
+    // Cale la hauteur réelle de la page sur la zone visible (hors clavier)
+    document.documentElement.style.height = vv.height + "px";
+    document.body.style.height = vv.height + "px";
+    pinPage();
+  }
+  vv.addEventListener("resize", syncViewport);
+  vv.addEventListener("scroll", pinPage);
+  syncViewport();
+}
+
 function load(){
   initTheme();
   items = JSON.parse(localStorage.getItem(KEY) || "[]");
