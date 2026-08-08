@@ -147,9 +147,11 @@ header h1 { margin: 0; font-size: 20px; flex-grow: 1; }
   left: 0;
   right: 0;
   display: flex;
-  overflow-y: auto; /* Seule cette boîte défile */
+  overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  overscroll-behavior-y: contain; /* Empêche le défilement de se propager au haut de la page */
+  /* Bloque la propagation du rebond vers le haut/bas */
+  overscroll-behavior: none; 
+  overscroll-behavior-y: none;
 }
 
 #lineNumbers {
@@ -900,6 +902,12 @@ saveNoteOpt.onclick = () => {
   }
   modalNote.style.display="none";
 };
-
+// Empêche iOS d'entraîner toute la page quand on glisse le doigt en dehors des zones défilables
+document.body.addEventListener('touchmove', function(e) {
+  let isScrollable = e.target.closest('.editor-container, #treeList, .icon-scroll-list');
+  if (!isScrollable) {
+    e.preventDefault();
+  }
+}, { passive: false });
 load();
 </script></body></html>
