@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
 <title>Notes</title>
 <link rel="apple-touch-icon" href="Notes.png">
 <style>
@@ -710,14 +710,7 @@ contentInput.addEventListener("mouseup", updateToolbarState);
 contentInput.addEventListener("touchend", updateToolbarState);
 contentInput.addEventListener("focus", updateToolbarState);
 
-/* ===== FIX iOS : empêche Safari de faire défiler toute la page          ===== */
-/* ===== (et donc l'en-tête + la barre d'outils) quand le clavier s'ouvre ===== */
-function pinPage(){
-  if (window.scrollX !== 0 || window.scrollY !== 0) window.scrollTo(0, 0);
-  if (document.body.scrollTop !== 0) document.body.scrollTop = 0;
-  if (document.documentElement.scrollTop !== 0) document.documentElement.scrollTop = 0;
-}
-window.addEventListener("scroll", pinPage, {passive:true});
+
 
 function load(){
   initTheme();
