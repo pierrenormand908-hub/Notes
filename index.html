@@ -135,6 +135,7 @@ header h1 { margin: 0; font-size: 20px; flex-grow: 1; }
 .tb-group { display: flex; gap: 4px; align-items: center; }
 #toolbar button, #toolbar select, .color-btn-label { padding: 6px 8px; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 6px; font-size: 14px; cursor: pointer; height: 34px; box-sizing: border-box; display: flex; align-items: center; gap: 4px; }
 #toolbar button:active { background: var(--accent); color: #fff; }
+#toolbar button.toolbar-toggle.active { background: var(--accent); color: #fff; border-color: var(--accent); }
 
 .select-size-compact {
   padding: 6px 2px 6px 6px !important;
@@ -364,15 +365,15 @@ header h1 { margin: 0; font-size: 20px; flex-grow: 1; }
 
     <div id="toolbar">
       <div class="tb-group">
-        <button onmousedown="event.preventDefault(); execCmd('bold');" title="Gras"><b>B</b></button>
-        <button onmousedown="event.preventDefault(); execCmd('italic');" title="Italique"><i>I</i></button>
-        <button onmousedown="event.preventDefault(); execCmd('underline');" title="Souligné"><u>U</u></button>
-        <button onmousedown="event.preventDefault(); execCmd('strikeThrough');" title="Barré"><s>S</s></button>
+        <button class="toolbar-toggle" data-cmd="bold" onmousedown="event.preventDefault(); execCmd('bold');" title="Gras"><b>B</b></button>
+        <button class="toolbar-toggle" data-cmd="italic" onmousedown="event.preventDefault(); execCmd('italic');" title="Italique"><i>I</i></button>
+        <button class="toolbar-toggle" data-cmd="underline" onmousedown="event.preventDefault(); execCmd('underline');" title="Souligné"><u>U</u></button>
+        <button class="toolbar-toggle" data-cmd="strikeThrough" onmousedown="event.preventDefault(); execCmd('strikeThrough');" title="Barré"><s>S</s></button>
       </div>
 
       <div class="tb-group">
-        <button onmousedown="event.preventDefault(); execCmd('insertUnorderedList');" title="Liste à puces">• Liste</button>
-        <button onmousedown="event.preventDefault(); execCmd('insertOrderedList');" title="Liste numérotée">1. Liste</button>
+        <button class="toolbar-toggle" data-cmd="insertUnorderedList" onmousedown="event.preventDefault(); execCmd('insertUnorderedList');" title="Liste à puces">• Liste</button>
+        <button class="toolbar-toggle" data-cmd="insertOrderedList" onmousedown="event.preventDefault(); execCmd('insertOrderedList');" title="Liste numérotée">1. Liste</button>
         <button onmousedown="event.preventDefault(); execCmd('formatBlock', 'blockquote');" title="Citation">💬</button>
         
         <select class="select-size-compact" onchange="changeTextSize(this.value);" title="Taille du texte">
@@ -607,6 +608,7 @@ function execCmd(command, value = null) {
     save();
     updateLineNumbers();
   }
+  updateToolbarState();
 }
 
 function changeTextSize(sizePt) {
@@ -683,6 +685,30 @@ toggleLinesBtn.onclick = () => {
 document.querySelector('.editor-container').onscroll = function() {
   if(showLines) lineNumbers.scrollTop = this.scrollTop;
 };
+
+/* ===== ÉTAT ACTIF DES BOUTONS DE LA BARRE D'OUTILS (gras, italique, etc.) ===== */
+const toolbarToggleBtns = document.querySelectorAll(".toolbar-toggle");
+
+function updateToolbarState(){
+  toolbarToggleBtns.forEach(btn => {
+    const cmd = btn.dataset.cmd;
+    let isActive = false;
+    try { isActive = document.queryCommandState(cmd); } catch(e) { isActive = false; }
+    btn.classList.toggle("active", isActive);
+  });
+}
+
+document.addEventListener("selectionchange", () => {
+  // Ne met à jour que si la sélection est bien dans la zone de note
+  const sel = window.getSelection();
+  if (sel.rangeCount && contentInput.contains(sel.getRangeAt(0).commonAncestorContainer)) {
+    updateToolbarState();
+  }
+});
+contentInput.addEventListener("keyup", updateToolbarState);
+contentInput.addEventListener("mouseup", updateToolbarState);
+contentInput.addEventListener("touchend", updateToolbarState);
+contentInput.addEventListener("focus", updateToolbarState);
 
 /* ===== FIX iOS : empêche Safari de faire défiler toute la page          ===== */
 /* ===== (et donc l'en-tête + la barre d'outils) quand le clavier s'ouvre ===== */
