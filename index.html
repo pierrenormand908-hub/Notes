@@ -20,19 +20,32 @@
   --linenum-color:#8892a0;
 }
 
-/* VERROUILLAGE TOTAL DE LA PAGE (EMPÊCHE LE BOUNCE IOS) */
+/* VERROUILLAGE TOTAL DE LA PAGE SUR IPHONE */
 html, body {
   margin: 0;
   padding: 0;
   font-family: -apple-system;
   background: var(--bg);
   color: var(--text);
+  height: 100vh;
   height: 100dvh;
   width: 100vw;
-  overflow: hidden;
-  position: fixed; /* Bloque le défilement de la page entière */
+  overflow: hidden !important;
+  position: fixed;
   top: 0;
   left: 0;
+  right: 0;
+  bottom: 0;
+  touch-action: none; /* Bloque les gestes de défilement natifs sur la page globale */
+}
+
+/* CONTENEUR GLOBAL */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
 }
 
 header {
@@ -44,6 +57,8 @@ header {
   border-bottom: 1px solid var(--border);
   height: 50px;
   box-sizing: border-box;
+  flex-shrink: 0;
+  touch-action: none;
 }
 header h1 { margin: 0; font-size: 20px; flex-grow: 1; }
 
@@ -59,7 +74,7 @@ header h1 { margin: 0; font-size: 20px; flex-grow: 1; }
 #closeSidebar { background: var(--bg); border: 1px solid var(--border); color: var(--text); font-size: 16px; padding: 4px 10px; border-radius: 6px; cursor: pointer; }
 #sidebar-actions { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px 0; margin-bottom: 10px; border-bottom: 1px solid var(--border); justify-content: space-between; }
 .action-btn { background: var(--bg); border: 1px solid var(--border); color: var(--text); font-size: 18px; padding: 6px 10px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 4px; }
-#treeList { list-style: none; padding: 0; margin: 0; overflow-y: auto; flex: 1; -webkit-overflow-scrolling: touch; }
+#treeList { list-style: none; padding: 0; margin: 0; overflow-y: auto; flex: 1; -webkit-overflow-scrolling: touch; touch-action: pan-y; }
 #treeList li { padding: 4px 6px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 6px; user-select: none; position: relative; }
 #treeList li.active { background: var(--accent)!important; color: #fff!important; }
 .arrow { width: 18px; text-align: center; cursor: pointer; flex-shrink: 0; }
@@ -75,14 +90,11 @@ header h1 { margin: 0; font-size: 20px; flex-grow: 1; }
 
 /* CONTENEUR PRINCIPAL RIGIDE */
 #main {
-  position: absolute;
-  top: 50px; /* Commence sous le header */
-  bottom: 0;
-  left: 0;
-  right: 0;
+  flex: 1;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  position: relative;
 }
 
 #editor-header {
@@ -93,6 +105,7 @@ header h1 { margin: 0; font-size: 20px; flex-grow: 1; }
   gap: 6px;
   align-items: center;
   flex-shrink: 0;
+  touch-action: none;
 }
 
 #node-title { flex: 1; min-width: 80px; max-width: 220px; padding: 8px; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; color: var(--text); font-size: 16px; }
@@ -117,6 +130,7 @@ header h1 { margin: 0; font-size: 20px; flex-grow: 1; }
   gap: 6px;
   align-items: center;
   flex-shrink: 0;
+  touch-action: none;
 }
 .tb-group { display: flex; gap: 4px; align-items: center; }
 #toolbar button, #toolbar select, .color-btn-label { padding: 6px 8px; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 6px; font-size: 14px; cursor: pointer; height: 34px; box-sizing: border-box; display: flex; align-items: center; gap: 4px; }
@@ -132,10 +146,10 @@ header h1 { margin: 0; font-size: 20px; flex-grow: 1; }
 .color-picker-wrapper { display: flex; align-items: center; gap: 4px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 2px 6px; height: 34px; box-sizing: border-box; font-size: 13px; }
 .color-picker-wrapper input[type="color"] { width: 26px; height: 26px; border: none; background: none; cursor: pointer; padding: 0; }
 
-/* CONTENEUR DE L'ÉDITEUR ISOLÉ EN POSITION ABSOLUE */
+/* CONTENEUR DE L'ÉDITEUR ISOLÉ */
 .editor-wrapper {
-  position: relative;
   flex: 1;
+  position: relative;
   width: 100%;
   overflow: hidden;
 }
@@ -147,10 +161,10 @@ header h1 { margin: 0; font-size: 20px; flex-grow: 1; }
   left: 0;
   right: 0;
   display: flex;
-  overflow-y: auto;
+  overflow-y: scroll; /* Seule cette zone défile */
   -webkit-overflow-scrolling: touch;
-  /* Bloque la propagation du rebond vers le haut/bas */
-  overscroll-behavior: none; 
+  touch-action: pan-y; /* Autorise uniquement le scroll vertical ici */
+  overscroll-behavior: none;
   overscroll-behavior-y: none;
 }
 
@@ -187,7 +201,7 @@ header h1 { margin: 0; font-size: 20px; flex-grow: 1; }
 #content blockquote { border-left: 4px solid var(--accent); margin: 6px 0; padding-left: 10px; color: #777; font-style: italic; }
 
 #modal,#modalSub,#modalNote,#confirmDelete { position: fixed; inset: 0; background: rgba(0,0,0,.6); display: none; justify-content: center; align-items: center; z-index: 3000; }
-.modalBox { background: var(--bg2); padding: 20px; width: 90%; max-width: 320px; border-radius: 10px; display: flex; flex-direction: column; gap: 8px; max-height: 90vh; overflow-y: auto; }
+.modalBox { background: var(--bg2); padding: 20px; width: 90%; max-width: 320px; border-radius: 10px; display: flex; flex-direction: column; gap: 8px; max-height: 90vh; overflow-y: auto; -webkit-overflow-scrolling: touch; touch-action: pan-y; }
 .modalBox input,.modalBox select { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text); box-sizing: border-box; font-size: 16px; }
 .modal-row { display: flex; gap: 10px; }
 .modal-col { flex: 1; display: flex; flex-direction: column; align-items: center; font-size: 14px; cursor: pointer; }
@@ -199,7 +213,7 @@ header h1 { margin: 0; font-size: 20px; flex-grow: 1; }
 .icon-yellow { color: #fbc02d; }
 
 .icon-picker-section { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
-.icon-scroll-list { max-height: 120px; overflow-y: auto; border: 1px solid var(--border); border-radius: 6px; padding: 6px; background: var(--bg); display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+.icon-scroll-list { max-height: 120px; overflow-y: auto; border: 1px solid var(--border); border-radius: 6px; padding: 6px; background: var(--bg); display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; -webkit-overflow-scrolling: touch; touch-action: pan-y; }
 .icon-option { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border: 1px solid transparent; border-radius: 4px; cursor: pointer; font-size: 20px; background: var(--bg2); }
 .icon-option:hover, .icon-option.selected { border-color: var(--accent); background: rgba(58,143,208,0.2); }
 .icon-option img { width: 24px; height: 24px; object-fit: contain; }
@@ -207,204 +221,213 @@ header h1 { margin: 0; font-size: 20px; flex-grow: 1; }
 </head>
 <body>
 
-<header>
-  <button id="toggleSidebar">▶</button>
-  <h1>Notes</h1>
-  <div class="theme-toggle-group">
-    <button class="theme-btn" id="lightThemeBtn" onclick="setTheme('light')" title="Mode Clair">☀️</button>
-    <button class="theme-btn" id="darkThemeBtn" onclick="setTheme('dark')" title="Mode Sombre">🌙</button>
-  </div>
-</header>
-
-<div id="sidebar">
-  <div class="sidebar-header">
-    <h2>Arbre</h2>
-    <button id="closeSidebar" title="Fermer">⬅</button>
-  </div>
-  <div id="sidebar-actions">
-    <button class="action-btn" id="addFolder" title="Nouveau Dossier">📁</button>
-    <button class="action-btn" id="addSubFolder" title="Nouveau Sous-dossier">📂</button>
-    <button class="action-btn" id="addNote" title="Nouvelle Note / Sous-note">📝</button>
-    <button class="action-btn" id="exportBtn" title="Enregistrer l'arbre complet" style="font-size:14px; font-weight:bold;">💾 Enregistrer</button>
-    <button class="action-btn" id="importBtn" title="Restaurer l'arbre" style="font-size:14px;">📂 Charger<input type="file" id="importFile" accept=".json" style="display:none"></button>
-  </div>
-  <ul id="treeList"></ul>
-</div>
-
-<div id="contextMenu">
-    <button id="ctxOptions">Options</button>
-    <button id="ctxDelete" class="delete-option">Supprimer</button>
-</div>
-
-<!-- MODAL DOSSIER -->
-<div id="modal">
-  <div class="modalBox">
-    <h3>Option Dossier</h3>
-    <input id="folderName" placeholder="Nom">
-    <label>Police :</label>
-    <select id="folderFont"><option value="-apple-system">Défaut</option><option value="Arial">Arial</option><option value="Courier New">Courier New</option><option value="Georgia">Georgia</option><option value="Verdana">Verdana</option></select>
-    <label>Taille :</label>
-    <select id="folderSize"><option value="13px">13px</option><option value="14px" selected>14px</option><option value="16px">16px</option><option value="18px">18px</option></select>
-    <div class="modal-row">
-      <label class="modal-col">Gras<input type="checkbox" id="folderBold"></label>
-      <label class="modal-col">Italique<input type="checkbox" id="folderItalic"></label>
-      <label class="modal-col">Souligné<input type="checkbox" id="folderUnderline"></label>
+<div class="app-container">
+  <header>
+    <button id="toggleSidebar">▶</button>
+    <h1>Notes</h1>
+    <div class="theme-toggle-group">
+      <button class="theme-btn" id="lightThemeBtn" onclick="setTheme('light')" title="Mode Clair">☀️</button>
+      <button class="theme-btn" id="darkThemeBtn" onclick="setTheme('dark')" title="Mode Sombre">🌙</button>
     </div>
-    <label>Fond :</label><input type="color" id="folderBgColor" value="#252526">
-    <label>Texte :</label><input type="color" id="folderTextColor" value="#ffffff">
-    
-    <label>Icône :</label>
-    <div class="icon-picker-section">
-      <div class="icon-scroll-list" id="folderIconList"></div>
+  </header>
+
+  <div id="sidebar">
+    <div class="sidebar-header">
+      <h2>Arbre</h2>
+      <button id="closeSidebar" title="Fermer">⬅</button>
     </div>
-
-    <div class="modalButtons"><button class="modal-btn cancel-btn" id="cancelModal">Annuler</button><button class="modal-btn create-btn" id="createFolder">OK</button></div>
-  </div>
-</div>
-
-<!-- MODAL SOUS-DOSSIER -->
-<div id="modalSub">
-  <div class="modalBox">
-    <h3>Option Sous-dossier</h3>
-    <input id="subName" placeholder="Nom">
-    <label>Police :</label>
-    <select id="subFont"><option value="-apple-system">Défaut</option><option value="Arial">Arial</option><option value="Courier New">Courier New</option><option value="Georgia">Georgia</option><option value="Verdana">Verdana</option></select>
-    <label>Taille :</label>
-    <select id="subSize"><option value="13px">13px</option><option value="14px" selected>14px</option><option value="16px">16px</option><option value="18px">18px</option></select>
-    <div class="modal-row">
-      <label class="modal-col">Gras<input type="checkbox" id="subBold"></label>
-      <label class="modal-col">Italique<input type="checkbox" id="subItalic"></label>
-      <label class="modal-col">Souligné<input type="checkbox" id="subUnderline"></label>
+    <div id="sidebar-actions">
+      <button class="action-btn" id="addFolder" title="Nouveau Dossier">📁</button>
+      <button class="action-btn" id="addSubFolder" title="Nouveau Sous-dossier">📂</button>
+      <button class="action-btn" id="addNote" title="Nouvelle Note / Sous-note">📝</button>
+      <button class="action-btn" id="exportBtn" title="Enregistrer l'arbre complet" style="font-size:14px; font-weight:bold;">💾 Enregistrer</button>
+      <button class="action-btn" id="importBtn" title="Restaurer l'arbre" style="font-size:14px;">📂 Charger<input type="file" id="importFile" accept=".json" style="display:none"></button>
     </div>
-    <label>Fond :</label><input type="color" id="subBgColor" value="#252526">
-    <label>Texte :</label><input type="color" id="subTextColor" value="#ffffff">
-    
-    <label>Icône :</label>
-    <div class="icon-picker-section">
-      <div class="icon-scroll-list" id="subIconList"></div>
-    </div>
-
-    <div class="modalButtons"><button class="modal-btn cancel-btn" id="cancelModalSub">Annuler</button><button class="modal-btn create-btn" id="createSub">OK</button></div>
-  </div>
-</div>
-
-<!-- MODAL NOTE -->
-<div id="modalNote">
-  <div class="modalBox">
-    <h3>Option Note</h3>
-    <input id="noteName" placeholder="Titre">
-    <label>Police :</label>
-    <select id="noteFont"><option value="-apple-system">Défaut</option><option value="Arial">Arial</option><option value="Courier New">Courier New</option><option value="Georgia">Georgia</option><option value="Verdana">Verdana</option></select>
-    <label>Taille :</label>
-    <select id="noteSize"><option value="13px">13px</option><option value="14px" selected>14px</option><option value="16px">16px</option><option value="18px">18px</option></select>
-    <div class="modal-row">
-      <label class="modal-col">Gras<input type="checkbox" id="noteBold"></label>
-      <label class="modal-col">Italique<input type="checkbox" id="noteItalic"></label>
-      <label class="modal-col">Souligné<input type="checkbox" id="noteUnderline"></label>
-    </div>
-    <label>Fond :</label><input type="color" id="noteBgColor" value="#252526">
-    <label>Texte :</label><input type="color" id="noteTextColor" value="#ffffff">
-    
-    <label>Icône :</label>
-    <div class="icon-picker-section">
-      <div class="icon-scroll-list" id="noteIconList"></div>
-    </div>
-
-    <div class="modalButtons"><button class="modal-btn cancel-btn" id="cancelModalNote">Annuler</button><button class="modal-btn create-btn" id="saveNoteOpt">OK</button></div>
-  </div>
-</div>
-
-<div id="confirmDelete"><div class="modalBox"><h3>Supprimer ?</h3><p id="delName"></p><div class="modalButtons"><button class="modal-btn cancel-btn" id="delCancel">Annuler</button><button class="modal-btn create-btn" id="delOk" style="background:#d33">Supprimer</button></div></div></div>
-
-<div id="main">
-  <div id="editor-header">
-    <input id="node-title" placeholder="Titre">
-    
-    <select id="fontFamilySelect" onchange="execCmd('fontName', this.value)" title="Changer la police de caractères">
-      <option value="-apple-system" selected>Police</option>
-      <option value="Apple Color Emoji">Apple Color Emoji</option>
-      <option value="Arial">Arial</option>
-      <option value="Arial Black">Arial Black</option>
-      <option value="Arial Narrow">Arial Narrow</option>
-      <option value="Cambria">Cambria</option>
-      <option value="Comic Sans MS">Comic Sans</option>
-      <option value="Consolas">Consolas</option>
-      <option value="Courier New">Courier</option>
-      <option value="Georgia">Georgia</option>
-      <option value="Hiragino Mincho ProN">Hiragino Mincho</option>
-      <option value="Impact">Impact</option>
-      <option value="Lucida Console">Lucida</option>
-      <option value="Monaco">Monaco</option>
-      <option value="Noteworthy">Noteworthy</option>
-      <option value="Segoe UI">Segoe UI</option>
-      <option value="Snell Roundhand">Snell Roundhand</option>
-      <option value="Tahoma">Tahoma</option>
-      <option value="Times New Roman">Times</option>
-      <option value="Trebuchet MS">Trebuchet</option>
-      <option value="Verdana">Verdana</option>
-    </select>
-
-    <button id="toggleLinesBtn" title="Afficher/Masquer les numéros de ligne">123</button>
+    <ul id="treeList"></ul>
   </div>
 
-  <div id="toolbar">
-    <div class="tb-group">
-      <button onmousedown="event.preventDefault(); execCmd('bold');" title="Gras"><b>B</b></button>
-      <button onmousedown="event.preventDefault(); execCmd('italic');" title="Italique"><i>I</i></button>
-      <button onmousedown="event.preventDefault(); execCmd('underline');" title="Souligné"><u>U</u></button>
-      <button onmousedown="event.preventDefault(); execCmd('strikeThrough');" title="Barré"><s>S</s></button>
-    </div>
+  <div id="contextMenu">
+      <button id="ctxOptions">Options</button>
+      <button id="ctxDelete" class="delete-option">Supprimer</button>
+  </div>
 
-    <div class="tb-group">
-      <button onmousedown="event.preventDefault(); execCmd('insertUnorderedList');" title="Liste à puces">• Liste</button>
-      <button onmousedown="event.preventDefault(); execCmd('insertOrderedList');" title="Liste numérotée">1. Liste</button>
-      <button onmousedown="event.preventDefault(); execCmd('formatBlock', 'blockquote');" title="Citation">💬</button>
+  <!-- MODAL DOSSIER -->
+  <div id="modal">
+    <div class="modalBox">
+      <h3>Option Dossier</h3>
+      <input id="folderName" placeholder="Nom">
+      <label>Police :</label>
+      <select id="folderFont"><option value="-apple-system">Défaut</option><option value="Arial">Arial</option><option value="Courier New">Courier New</option><option value="Georgia">Georgia</option><option value="Verdana">Verdana</option></select>
+      <label>Taille :</label>
+      <select id="folderSize"><option value="13px">13px</option><option value="14px" selected>14px</option><option value="16px">16px</option><option value="18px">18px</option></select>
+      <div class="modal-row">
+        <label class="modal-col">Gras<input type="checkbox" id="folderBold"></label>
+        <label class="modal-col">Italique<input type="checkbox" id="folderItalic"></label>
+        <label class="modal-col">Souligné<input type="checkbox" id="folderUnderline"></label>
+      </div>
+      <label>Fond :</label><input type="color" id="folderBgColor" value="#252526">
+      <label>Texte :</label><input type="color" id="folderTextColor" value="#ffffff">
       
-      <select class="select-size-compact" onchange="changeTextSize(this.value);" title="Taille du texte">
-        <option value="8pt">8pt</option>
-        <option value="9pt">9pt</option>
-        <option value="10pt">10pt</option>
-        <option value="11pt">11pt</option>
-        <option value="12pt" selected>12pt</option>
-        <option value="14pt">14pt</option>
-        <option value="16pt">16pt</option>
-        <option value="18pt">18pt</option>
-        <option value="20pt">20pt</option>
-        <option value="24pt">24pt</option>
-        <option value="28pt">28pt</option>
-        <option value="32pt">32pt</option>
-        <option value="36pt">36pt</option>
-      </select>
-    </div>
-
-    <div class="tb-group">
-      <button onmousedown="event.preventDefault(); execCmd('formatBlock', 'h1');" title="Grand Titre">H1</button>
-      <button onmousedown="event.preventDefault(); execCmd('formatBlock', 'h2');" title="Sous-titre">H2</button>
-      <button onmousedown="event.preventDefault(); addLink();" title="Insérer un lien">🔗</button>
-      <button onmousedown="event.preventDefault(); execCmd('undo');" title="Annuler">↩️</button>
-      <button onmousedown="event.preventDefault(); execCmd('redo');" title="Rétablir">↪️</button>
-    </div>
-
-    <div class="tb-group">
-      <div class="color-picker-wrapper" title="Couleur du texte">
-        🎨 Texte <input type="color" id="textColorPicker" onchange="execCmd('foreColor', this.value)">
+      <label>Icône :</label>
+      <div class="icon-picker-section">
+        <div class="icon-scroll-list" id="folderIconList"></div>
       </div>
-      <div class="color-picker-wrapper" title="Surligner le texte">
-        🟡 Fond <input type="color" id="bgColorPicker" value="#ffff00" onchange="execCmd('hiliteColor', this.value)">
-      </div>
-      <button onmousedown="event.preventDefault(); execCmd('removeFormat');" title="Effacer tout le formatage">🧹</button>
+
+      <div class="modalButtons"><button class="modal-btn cancel-btn" id="cancelModal">Annuler</button><button class="modal-btn create-btn" id="createFolder">OK</button></div>
     </div>
   </div>
 
-  <div class="editor-wrapper">
-    <div class="editor-container">
-      <div id="lineNumbers"></div>
-      <div id="content" contenteditable="true" placeholder="Tape ta note ou colle ton texte..."></div>
+  <!-- MODAL SOUS-DOSSIER -->
+  <div id="modalSub">
+    <div class="modalBox">
+      <h3>Option Sous-dossier</h3>
+      <input id="subName" placeholder="Nom">
+      <label>Police :</label>
+      <select id="subFont"><option value="-apple-system">Défaut</option><option value="Arial">Arial</option><option value="Courier New">Courier New</option><option value="Georgia">Georgia</option><option value="Verdana">Verdana</option></select>
+      <label>Taille :</label>
+      <select id="subSize"><option value="13px">13px</option><option value="14px" selected>14px</option><option value="16px">16px</option><option value="18px">18px</option></select>
+      <div class="modal-row">
+        <label class="modal-col">Gras<input type="checkbox" id="subBold"></label>
+        <label class="modal-col">Italique<input type="checkbox" id="subItalic"></label>
+        <label class="modal-col">Souligné<input type="checkbox" id="subUnderline"></label>
+      </div>
+      <label>Fond :</label><input type="color" id="subBgColor" value="#252526">
+      <label>Texte :</label><input type="color" id="subTextColor" value="#ffffff">
+      
+      <label>Icône :</label>
+      <div class="icon-picker-section">
+        <div class="icon-scroll-list" id="subIconList"></div>
+      </div>
+
+      <div class="modalButtons"><button class="modal-btn cancel-btn" id="cancelModalSub">Annuler</button><button class="modal-btn create-btn" id="createSub">OK</button></div>
+    </div>
+  </div>
+
+  <!-- MODAL NOTE -->
+  <div id="modalNote">
+    <div class="modalBox">
+      <h3>Option Note</h3>
+      <input id="noteName" placeholder="Titre">
+      <label>Police :</label>
+      <select id="noteFont"><option value="-apple-system">Défaut</option><option value="Arial">Arial</option><option value="Courier New">Courier New</option><option value="Georgia">Georgia</option><option value="Verdana">Verdana</option></select>
+      <label>Taille :</label>
+      <select id="noteSize"><option value="13px">13px</option><option value="14px" selected>14px</option><option value="16px">16px</option><option value="18px">18px</option></select>
+      <div class="modal-row">
+        <label class="modal-col">Gras<input type="checkbox" id="noteBold"></label>
+        <label class="modal-col">Italique<input type="checkbox" id="noteItalic"></label>
+        <label class="modal-col">Souligné<input type="checkbox" id="noteUnderline"></label>
+      </div>
+      <label>Fond :</label><input type="color" id="noteBgColor" value="#252526">
+      <label>Texte :</label><input type="color" id="noteTextColor" value="#ffffff">
+      
+      <label>Icône :</label>
+      <div class="icon-picker-section">
+        <div class="icon-scroll-list" id="noteIconList"></div>
+      </div>
+
+      <div class="modalButtons"><button class="modal-btn cancel-btn" id="cancelModalNote">Annuler</button><button class="modal-btn create-btn" id="saveNoteOpt">OK</button></div>
+    </div>
+  </div>
+
+  <div id="confirmDelete"><div class="modalBox"><h3>Supprimer ?</h3><p id="delName"></p><div class="modalButtons"><button class="modal-btn cancel-btn" id="delCancel">Annuler</button><button class="modal-btn create-btn" id="delOk" style="background:#d33">Supprimer</button></div></div></div>
+
+  <div id="main">
+    <div id="editor-header">
+      <input id="node-title" placeholder="Titre">
+      
+      <select id="fontFamilySelect" onchange="execCmd('fontName', this.value)" title="Changer la police de caractères">
+        <option value="-apple-system" selected>Police</option>
+        <option value="Apple Color Emoji">Apple Color Emoji</option>
+        <option value="Arial">Arial</option>
+        <option value="Arial Black">Arial Black</option>
+        <option value="Arial Narrow">Arial Narrow</option>
+        <option value="Cambria">Cambria</option>
+        <option value="Comic Sans MS">Comic Sans</option>
+        <option value="Consolas">Consolas</option>
+        <option value="Courier New">Courier</option>
+        <option value="Georgia">Georgia</option>
+        <option value="Hiragino Mincho ProN">Hiragino Mincho</option>
+        <option value="Impact">Impact</option>
+        <option value="Lucida Console">Lucida</option>
+        <option value="Monaco">Monaco</option>
+        <option value="Noteworthy">Noteworthy</option>
+        <option value="Segoe UI">Segoe UI</option>
+        <option value="Snell Roundhand">Snell Roundhand</option>
+        <option value="Tahoma">Tahoma</option>
+        <option value="Times New Roman">Times</option>
+        <option value="Trebuchet MS">Trebuchet</option>
+        <option value="Verdana">Verdana</option>
+      </select>
+
+      <button id="toggleLinesBtn" title="Afficher/Masquer les numéros de ligne">123</button>
+    </div>
+
+    <div id="toolbar">
+      <div class="tb-group">
+        <button onmousedown="event.preventDefault(); execCmd('bold');" title="Gras"><b>B</b></button>
+        <button onmousedown="event.preventDefault(); execCmd('italic');" title="Italique"><i>I</i></button>
+        <button onmousedown="event.preventDefault(); execCmd('underline');" title="Souligné"><u>U</u></button>
+        <button onmousedown="event.preventDefault(); execCmd('strikeThrough');" title="Barré"><s>S</s></button>
+      </div>
+
+      <div class="tb-group">
+        <button onmousedown="event.preventDefault(); execCmd('insertUnorderedList');" title="Liste à puces">• Liste</button>
+        <button onmousedown="event.preventDefault(); execCmd('insertOrderedList');" title="Liste numérotée">1. Liste</button>
+        <button onmousedown="event.preventDefault(); execCmd('formatBlock', 'blockquote');" title="Citation">💬</button>
+        
+        <select class="select-size-compact" onchange="changeTextSize(this.value);" title="Taille du texte">
+          <option value="8pt">8pt</option>
+          <option value="9pt">9pt</option>
+          <option value="10pt">10pt</option>
+          <option value="11pt">11pt</option>
+          <option value="12pt" selected>12pt</option>
+          <option value="14pt">14pt</option>
+          <option value="16pt">16pt</option>
+          <option value="18pt">18pt</option>
+          <option value="20pt">20pt</option>
+          <option value="24pt">24pt</option>
+          <option value="28pt">28pt</option>
+          <option value="32pt">32pt</option>
+          <option value="36pt">36pt</option>
+        </select>
+      </div>
+
+      <div class="tb-group">
+        <button onmousedown="event.preventDefault(); execCmd('formatBlock', 'h1');" title="Grand Titre">H1</button>
+        <button onmousedown="event.preventDefault(); execCmd('formatBlock', 'h2');" title="Sous-titre">H2</button>
+        <button onmousedown="event.preventDefault(); addLink();" title="Insérer un lien">🔗</button>
+        <button onmousedown="event.preventDefault(); execCmd('undo');" title="Annuler">↩️</button>
+        <button onmousedown="event.preventDefault(); execCmd('redo');" title="Rétablir">↪️</button>
+      </div>
+
+      <div class="tb-group">
+        <div class="color-picker-wrapper" title="Couleur du texte">
+          🎨 Texte <input type="color" id="textColorPicker" onchange="execCmd('foreColor', this.value)">
+        </div>
+        <div class="color-picker-wrapper" title="Surligner le texte">
+          🟡 Fond <input type="color" id="bgColorPicker" value="#ffff00" onchange="execCmd('hiliteColor', this.value)">
+        </div>
+        <button onmousedown="event.preventDefault(); execCmd('removeFormat');" title="Effacer tout le formatage">🧹</button>
+      </div>
+    </div>
+
+    <div class="editor-wrapper">
+      <div class="editor-container">
+        <div id="lineNumbers"></div>
+        <div id="content" contenteditable="true" placeholder="Tape ta note ou colle ton texte..."></div>
+      </div>
     </div>
   </div>
 </div>
 
 <script>
+// BLOQUEUR ANTI-GLISSEMENT D'ÉCRAN GLOBAL SUR IPHONE
+document.addEventListener('touchmove', function (e) {
+  if (!e.target.closest('.editor-container, #treeList, .modalBox, .icon-scroll-list')) {
+    e.preventDefault();
+  }
+}, { passive: false });
+
 const customPngIcons = {
   url1: "https://icons.iconarchive.com/icons/fatcow/farm-fresh/32/file-extension-html-icon.png",
   url2: "https://icons.iconarchive.com/icons/fatcow/farm-fresh/32/file-extension-wps-icon.png", 
@@ -902,12 +925,6 @@ saveNoteOpt.onclick = () => {
   }
   modalNote.style.display="none";
 };
-// Empêche iOS d'entraîner toute la page quand on glisse le doigt en dehors des zones défilables
-document.body.addEventListener('touchmove', function(e) {
-  let isScrollable = e.target.closest('.editor-container, #treeList, .icon-scroll-list');
-  if (!isScrollable) {
-    e.preventDefault();
-  }
-}, { passive: false });
+
 load();
 </script></body></html>
