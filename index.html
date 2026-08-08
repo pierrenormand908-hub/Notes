@@ -710,19 +710,15 @@ contentInput.addEventListener("mouseup", updateToolbarState);
 contentInput.addEventListener("touchend", updateToolbarState);
 contentInput.addEventListener("focus", updateToolbarState);
 
-/* ===== FIX iOS : neutralise le décalage que Safari applique à toute la page ===== */
-/* ===== (en-tête + barre d'outils) quand le clavier s'ouvre en mode standalone ===== */
+/* ===== FIX iOS : adapte la hauteur réelle de l'app à la zone visible ===== */
+/* ===== (hors clavier) en mode standalone, sans toucher à html/body      ===== */
 if (window.visualViewport) {
   const vv = window.visualViewport;
   const appRoot = document.querySelector(".app-container");
   function compensateKeyboardPan(){
-    // vv.offsetTop = décalage que Safari a appliqué pour garder le curseur visible.
-    // On applique le décalage inverse pour que l'app reste visuellement à sa place.
-    const offset = vv.offsetTop || 0;
-    appRoot.style.transform = offset ? `translateY(${offset}px)` : "";
+    appRoot.style.height = vv.height + "px";
   }
   vv.addEventListener("resize", compensateKeyboardPan);
-  vv.addEventListener("scroll", compensateKeyboardPan);
   compensateKeyboardPan();
 }
 
