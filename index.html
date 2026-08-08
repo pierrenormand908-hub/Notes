@@ -20,7 +20,7 @@
   --linenum-color:#8892a0;
 }
 
-/* VERROUILLAGE TOTAL DE LA PAGE SUR IPHONE */
+/* VERROUILLAGE DE LA PAGE SUR IPHONE (sans position:fixed pour laisser iOS gérer le clavier normalement) */
 html, body {
   margin: 0;
   padding: 0;
@@ -30,12 +30,8 @@ html, body {
   height: 100vh;
   height: 100dvh;
   width: 100vw;
-  overflow: hidden !important;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  overflow: hidden;
+  overscroll-behavior: none;
   touch-action: none; /* Bloque les gestes de défilement natifs sur la page globale */
 }
 
@@ -93,8 +89,18 @@ header h1 { margin: 0; font-size: 20px; flex-grow: 1; }
   flex: 1;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  overscroll-behavior-y: contain;
   position: relative;
+}
+
+.editor-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  flex-shrink: 0;
 }
 
 #editor-header {
@@ -147,26 +153,9 @@ header h1 { margin: 0; font-size: 20px; flex-grow: 1; }
 .color-picker-wrapper { display: flex; align-items: center; gap: 4px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 2px 6px; height: 34px; box-sizing: border-box; font-size: 13px; }
 .color-picker-wrapper input[type="color"] { width: 26px; height: 26px; border: none; background: none; cursor: pointer; padding: 0; }
 
-/* CONTENEUR DE L'ÉDITEUR ISOLÉ */
-.editor-wrapper {
-  flex: 1;
-  position: relative;
-  width: 100%;
-  overflow: hidden;
-}
-
 .editor-container {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
   display: flex;
-  overflow-y: scroll; /* Seule cette zone défile */
-  -webkit-overflow-scrolling: touch;
-  touch-action: pan-y; /* Autorise uniquement le scroll vertical ici */
-  overscroll-behavior: none;
-  overscroll-behavior-y: none;
+  flex: 1;
 }
 
 #lineNumbers {
@@ -334,90 +323,90 @@ header h1 { margin: 0; font-size: 20px; flex-grow: 1; }
   <div id="confirmDelete"><div class="modalBox"><h3>Supprimer ?</h3><p id="delName"></p><div class="modalButtons"><button class="modal-btn cancel-btn" id="delCancel">Annuler</button><button class="modal-btn create-btn" id="delOk" style="background:#d33">Supprimer</button></div></div></div>
 
   <div id="main">
-    <div id="editor-header">
-      <input id="node-title" placeholder="Titre">
+    <div class="editor-topbar">
+      <div id="editor-header">
+        <input id="node-title" placeholder="Titre">
 
-      <select id="fontFamilySelect" onchange="execCmd('fontName', this.value)" title="Changer la police de caractères">
-        <option value="-apple-system" selected>Police</option>
-        <option value="Apple Color Emoji">Apple Color Emoji</option>
-        <option value="Arial">Arial</option>
-        <option value="Arial Black">Arial Black</option>
-        <option value="Arial Narrow">Arial Narrow</option>
-        <option value="Cambria">Cambria</option>
-        <option value="Comic Sans MS">Comic Sans</option>
-        <option value="Consolas">Consolas</option>
-        <option value="Courier New">Courier</option>
-        <option value="Georgia">Georgia</option>
-        <option value="Hiragino Mincho ProN">Hiragino Mincho</option>
-        <option value="Impact">Impact</option>
-        <option value="Lucida Console">Lucida</option>
-        <option value="Monaco">Monaco</option>
-        <option value="Noteworthy">Noteworthy</option>
-        <option value="Segoe UI">Segoe UI</option>
-        <option value="Snell Roundhand">Snell Roundhand</option>
-        <option value="Tahoma">Tahoma</option>
-        <option value="Times New Roman">Times</option>
-        <option value="Trebuchet MS">Trebuchet</option>
-        <option value="Verdana">Verdana</option>
-      </select>
-
-      <button id="toggleLinesBtn" title="Afficher/Masquer les numéros de ligne">123</button>
-    </div>
-
-    <div id="toolbar">
-      <div class="tb-group">
-        <button class="toolbar-toggle" data-cmd="bold" onmousedown="event.preventDefault(); execCmd('bold');" title="Gras"><b>B</b></button>
-        <button class="toolbar-toggle" data-cmd="italic" onmousedown="event.preventDefault(); execCmd('italic');" title="Italique"><i>I</i></button>
-        <button class="toolbar-toggle" data-cmd="underline" onmousedown="event.preventDefault(); execCmd('underline');" title="Souligné"><u>U</u></button>
-        <button class="toolbar-toggle" data-cmd="strikeThrough" onmousedown="event.preventDefault(); execCmd('strikeThrough');" title="Barré"><s>S</s></button>
-      </div>
-
-      <div class="tb-group">
-        <button class="toolbar-toggle" data-cmd="insertUnorderedList" onmousedown="event.preventDefault(); execCmd('insertUnorderedList');" title="Liste à puces">• Liste</button>
-        <button class="toolbar-toggle" data-cmd="insertOrderedList" onmousedown="event.preventDefault(); execCmd('insertOrderedList');" title="Liste numérotée">1. Liste</button>
-        <button onmousedown="event.preventDefault(); execCmd('formatBlock', 'blockquote');" title="Citation">💬</button>
-
-        <select class="select-size-compact" onchange="changeTextSize(this.value);" title="Taille du texte">
-          <option value="8pt">8pt</option>
-          <option value="9pt">9pt</option>
-          <option value="10pt">10pt</option>
-          <option value="11pt">11pt</option>
-          <option value="12pt" selected>12pt</option>
-          <option value="14pt">14pt</option>
-          <option value="16pt">16pt</option>
-          <option value="18pt">18pt</option>
-          <option value="20pt">20pt</option>
-          <option value="24pt">24pt</option>
-          <option value="28pt">28pt</option>
-          <option value="32pt">32pt</option>
-          <option value="36pt">36pt</option>
+        <select id="fontFamilySelect" onchange="execCmd('fontName', this.value)" title="Changer la police de caractères">
+          <option value="-apple-system" selected>Police</option>
+          <option value="Apple Color Emoji">Apple Color Emoji</option>
+          <option value="Arial">Arial</option>
+          <option value="Arial Black">Arial Black</option>
+          <option value="Arial Narrow">Arial Narrow</option>
+          <option value="Cambria">Cambria</option>
+          <option value="Comic Sans MS">Comic Sans</option>
+          <option value="Consolas">Consolas</option>
+          <option value="Courier New">Courier</option>
+          <option value="Georgia">Georgia</option>
+          <option value="Hiragino Mincho ProN">Hiragino Mincho</option>
+          <option value="Impact">Impact</option>
+          <option value="Lucida Console">Lucida</option>
+          <option value="Monaco">Monaco</option>
+          <option value="Noteworthy">Noteworthy</option>
+          <option value="Segoe UI">Segoe UI</option>
+          <option value="Snell Roundhand">Snell Roundhand</option>
+          <option value="Tahoma">Tahoma</option>
+          <option value="Times New Roman">Times</option>
+          <option value="Trebuchet MS">Trebuchet</option>
+          <option value="Verdana">Verdana</option>
         </select>
+
+        <button id="toggleLinesBtn" title="Afficher/Masquer les numéros de ligne">123</button>
       </div>
 
-      <div class="tb-group">
-        <button onmousedown="event.preventDefault(); execCmd('formatBlock', 'h1');" title="Grand Titre">H1</button>
-        <button onmousedown="event.preventDefault(); execCmd('formatBlock', 'h2');" title="Sous-titre">H2</button>
-        <button onmousedown="event.preventDefault(); addLink();" title="Insérer un lien">🔗</button>
-        <button onmousedown="event.preventDefault(); execCmd('undo');" title="Annuler">↩️</button>
-        <button onmousedown="event.preventDefault(); execCmd('redo');" title="Rétablir">↪️</button>
-      </div>
+      <div id="toolbar">
+        <div class="tb-group">
+          <button class="toolbar-toggle" data-cmd="bold" onmousedown="event.preventDefault(); execCmd('bold');" title="Gras"><b>B</b></button>
+          <button class="toolbar-toggle" data-cmd="italic" onmousedown="event.preventDefault(); execCmd('italic');" title="Italique"><i>I</i></button>
+          <button class="toolbar-toggle" data-cmd="underline" onmousedown="event.preventDefault(); execCmd('underline');" title="Souligné"><u>U</u></button>
+          <button class="toolbar-toggle" data-cmd="strikeThrough" onmousedown="event.preventDefault(); execCmd('strikeThrough');" title="Barré"><s>S</s></button>
+        </div>
 
-      <div class="tb-group">
-        <div class="color-picker-wrapper" title="Couleur du texte">
-          🎨 Texte <input type="color" id="textColorPicker" onchange="execCmd('foreColor', this.value)">
+        <div class="tb-group">
+          <button class="toolbar-toggle" data-cmd="insertUnorderedList" onmousedown="event.preventDefault(); execCmd('insertUnorderedList');" title="Liste à puces">• Liste</button>
+          <button class="toolbar-toggle" data-cmd="insertOrderedList" onmousedown="event.preventDefault(); execCmd('insertOrderedList');" title="Liste numérotée">1. Liste</button>
+          <button onmousedown="event.preventDefault(); execCmd('formatBlock', 'blockquote');" title="Citation">💬</button>
+
+          <select class="select-size-compact" onchange="changeTextSize(this.value);" title="Taille du texte">
+            <option value="8pt">8pt</option>
+            <option value="9pt">9pt</option>
+            <option value="10pt">10pt</option>
+            <option value="11pt">11pt</option>
+            <option value="12pt" selected>12pt</option>
+            <option value="14pt">14pt</option>
+            <option value="16pt">16pt</option>
+            <option value="18pt">18pt</option>
+            <option value="20pt">20pt</option>
+            <option value="24pt">24pt</option>
+            <option value="28pt">28pt</option>
+            <option value="32pt">32pt</option>
+            <option value="36pt">36pt</option>
+          </select>
         </div>
-        <div class="color-picker-wrapper" title="Surligner le texte">
-          🟡 Fond <input type="color" id="bgColorPicker" value="#ffff00" onchange="execCmd('hiliteColor', this.value)">
+
+        <div class="tb-group">
+          <button onmousedown="event.preventDefault(); execCmd('formatBlock', 'h1');" title="Grand Titre">H1</button>
+          <button onmousedown="event.preventDefault(); execCmd('formatBlock', 'h2');" title="Sous-titre">H2</button>
+          <button onmousedown="event.preventDefault(); addLink();" title="Insérer un lien">🔗</button>
+          <button onmousedown="event.preventDefault(); execCmd('undo');" title="Annuler">↩️</button>
+          <button onmousedown="event.preventDefault(); execCmd('redo');" title="Rétablir">↪️</button>
         </div>
-        <button onmousedown="event.preventDefault(); execCmd('removeFormat');" title="Effacer tout le formatage">🧹</button>
+
+        <div class="tb-group">
+          <div class="color-picker-wrapper" title="Couleur du texte">
+            🎨 Texte <input type="color" id="textColorPicker" onchange="execCmd('foreColor', this.value)">
+          </div>
+          <div class="color-picker-wrapper" title="Surligner le texte">
+            🟡 Fond <input type="color" id="bgColorPicker" value="#ffff00" onchange="execCmd('hiliteColor', this.value)">
+          </div>
+          <button onmousedown="event.preventDefault(); execCmd('removeFormat');" title="Effacer tout le formatage">🧹</button>
+        </div>
       </div>
     </div>
 
-    <div class="editor-wrapper">
-      <div class="editor-container">
-        <div id="lineNumbers"></div>
-        <div id="content" contenteditable="true" placeholder="Tape ta note ou colle ton texte..."></div>
-      </div>
+    <div class="editor-container">
+      <div id="lineNumbers"></div>
+      <div id="content" contenteditable="true" placeholder="Tape ta note ou colle ton texte..."></div>
     </div>
   </div>
 </div>
@@ -425,7 +414,7 @@ header h1 { margin: 0; font-size: 20px; flex-grow: 1; }
 <script>
 // BLOQUEUR ANTI-GLISSEMENT D'ÉCRAN GLOBAL SUR IPHONE
 document.addEventListener('touchmove', function (e) {
-  if (!e.target.closest('.editor-container, #treeList, .modalBox, .icon-scroll-list')) {
+  if (!e.target.closest('#main, #treeList, .modalBox, .icon-scroll-list')) {
     e.preventDefault();
   }
 }, { passive: false });
@@ -683,9 +672,6 @@ toggleLinesBtn.onclick = () => {
   }
 };
 
-document.querySelector('.editor-container').onscroll = function() {
-  if(showLines) lineNumbers.scrollTop = this.scrollTop;
-};
 
 
 
