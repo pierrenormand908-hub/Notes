@@ -719,19 +719,6 @@ function pinPage(){
 }
 window.addEventListener("scroll", pinPage, {passive:true});
 
-if (window.visualViewport) {
-  const vv = window.visualViewport;
-  function syncViewport(){
-    // Cale la hauteur réelle de la page sur la zone visible (hors clavier)
-    document.documentElement.style.height = vv.height + "px";
-    document.body.style.height = vv.height + "px";
-    pinPage();
-  }
-  vv.addEventListener("resize", syncViewport);
-  vv.addEventListener("scroll", pinPage);
-  syncViewport();
-}
-
 function load(){
   initTheme();
   items = JSON.parse(localStorage.getItem(KEY) || "[]");
