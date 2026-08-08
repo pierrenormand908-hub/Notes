@@ -20,16 +20,16 @@
   --linenum-color:#8892a0;
 }
 
-/* VERROUILLAGE DE L'ÉCRAN GLOBAL (FIXE LES BARRES SUR IPHONE) */
+/* VERROUILLAGE DE L'ÉCRAN GLOBAL */
 html, body {
   margin: 0;
   padding: 0;
   font-family: -apple-system;
   background: var(--bg);
   color: var(--text);
-  height: 100dvh; /* Utilise la hauteur réelle visible sur iOS */
+  height: 100dvh;
   width: 100vw;
-  overflow: hidden; /* Interdit le défilement complet du document */
+  overflow: hidden; /* Interdit le défilement de la page */
   display: flex;
   flex-direction: column;
 }
@@ -43,7 +43,7 @@ header {
   border-bottom: 1px solid var(--border);
   height: 50px;
   box-sizing: border-box;
-  flex-shrink: 0; /* Ne se réduit jamais */
+  flex-shrink: 0; /* Toujours fixe */
 }
 header h1 { margin: 0; font-size: 20px; flex-grow: 1; }
 
@@ -73,13 +73,14 @@ header h1 { margin: 0; font-size: 20px; flex-grow: 1; }
 #contextMenu button:hover { background: var(--accent); color: #fff; }
 .delete-option { color: #d33!important; }
 
-/* CONTENEUR PRINCIPAL */
+/* CONTENEUR PRINCIPAL VERROUILLÉ EN HAUTEUR */
 #main {
   flex: 1;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: hidden; /* Empêche le conteneur global de défiler */
   position: relative;
+  height: calc(100dvh - 50px); /* Hauteur fixe sous le header */
 }
 
 #editor-header {
@@ -89,10 +90,9 @@ header h1 { margin: 0; font-size: 20px; flex-grow: 1; }
   display: flex;
   gap: 6px;
   align-items: center;
-  flex-shrink: 0; /* Ne se réduit pas */
+  flex-shrink: 0; /* Ne monte jamais */
 }
 
-/* RECTANGLE TITRE & SÉLECTEUR DE POLICE ADAPTÉ IPHONE */
 #node-title { flex: 1; min-width: 80px; max-width: 220px; padding: 8px; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; color: var(--text); font-size: 16px; }
 #fontFamilySelect { padding: 6px 4px; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 6px; font-size: 13px; cursor: pointer; height: 36px; box-sizing: border-box; max-width: 120px; text-overflow: ellipsis; }
 
@@ -105,7 +105,7 @@ header h1 { margin: 0; font-size: 20px; flex-grow: 1; }
   #editor-header { gap: 4px; padding: 6px; }
 }
 
-/* BARRE D'OUTILS COMPACTE ET FIXE */
+/* BARRE D'OUTILS FIXE */
 #toolbar {
   padding: 6px 10px;
   background: var(--bg2);
@@ -114,7 +114,7 @@ header h1 { margin: 0; font-size: 20px; flex-grow: 1; }
   flex-wrap: wrap;
   gap: 6px;
   align-items: center;
-  flex-shrink: 0; /* Ne se réduit pas lors du défilement */
+  flex-shrink: 0; /* Ne monte jamais */
 }
 .tb-group { display: flex; gap: 4px; align-items: center; }
 #toolbar button, #toolbar select, .color-btn-label { padding: 6px 8px; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 6px; font-size: 14px; cursor: pointer; height: 34px; box-sizing: border-box; display: flex; align-items: center; gap: 4px; }
@@ -130,13 +130,14 @@ header h1 { margin: 0; font-size: 20px; flex-grow: 1; }
 .color-picker-wrapper { display: flex; align-items: center; gap: 4px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 2px 6px; height: 34px; box-sizing: border-box; font-size: 13px; }
 .color-picker-wrapper input[type="color"] { width: 26px; height: 26px; border: none; background: none; cursor: pointer; padding: 0; }
 
-/* ZONE D'ÉDITION AUTONOME : SEULE À DÉFILER */
+/* SEULE CETTE ZONE DE TEXTE PEUT DÉFILER */
 .editor-container {
   display: flex;
   flex: 1;
+  min-height: 0; /* Requis pour WebKit/Safari iOS pour limiter le flex */
   position: relative;
-  overflow-y: auto; /* Active le défilement vertical uniquement ici */
-  -webkit-overflow-scrolling: touch; /* Fluidité iOS */
+  overflow-y: auto; /* Active le défilement ici uniquement */
+  -webkit-overflow-scrolling: touch;
 }
 
 #lineNumbers {
@@ -145,7 +146,7 @@ header h1 { margin: 0; font-size: 20px; flex-grow: 1; }
   color: var(--linenum-color);
   font-family: monospace;
   font-size: 14px;
-  padding: 12px 4px;
+  padding: 16px 4px;
   text-align: right;
   user-select: none;
   overflow: hidden;
@@ -154,13 +155,13 @@ header h1 { margin: 0; font-size: 20px; flex-grow: 1; }
   line-height: 1.5;
 }
 
-/* ZONE EDITEUR CONTENTEDITABLE */
+/* MARGES EXTÉRIEURES POUR FACILITER LA SAISIE ET LE COLLAGE */
 #content {
   flex: 1;
   background: var(--bg);
   color: var(--text);
   border: none;
-  padding: 24px;
+  padding: 16px 24px; /* Marges intérieures confortables (Haut/Bas 16px, Gauche/Droite 24px) */
   box-sizing: border-box;
   font-size: 14px;
   font-family: sans-serif;
@@ -640,8 +641,8 @@ toggleLinesBtn.onclick = () => {
   }
 };
 
-contentInput.onscroll = () => {
-  if(showLines) lineNumbers.scrollTop = contentInput.scrollTop;
+document.querySelector('.editor-container').onscroll = function() {
+  if(showLines) lineNumbers.scrollTop = this.scrollTop;
 };
 
 function load(){
