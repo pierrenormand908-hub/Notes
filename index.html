@@ -66,10 +66,12 @@ header h1{margin:0;font-size:20px;flex-grow:1}
   #editor-header { gap: 4px; padding: 6px; }
 }
 
-/* BARRE D'OUTILS COMPACTE */
-#toolbar{padding:6px 10px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+/* BARRE D'OUTILS COMPACTE - collée juste au-dessus du clavier, visible seulement en écriture */
+#toolbar{position:fixed;left:0;right:0;bottom:0;padding:6px 10px;background:var(--bg2);border-top:1px solid var(--border);display:none;flex-wrap:wrap;gap:6px;align-items:center;z-index:1000;}
+#toolbar.visible{display:flex;}
 .tb-group{display:flex;gap:4px;align-items:center}
 #toolbar button, #toolbar select, .color-btn-label{padding:6px 8px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:6px;font-size:14px;cursor:pointer;height:34px;box-sizing:border-box;display:flex;align-items:center;gap:4px}
+#toolbar button:active{background:var(--accent);color:#fff}
 
 /* BOUTONS D'ÉDITION ACTIFS EN BLEU */
 #toolbar button.active {
@@ -92,7 +94,8 @@ header h1{margin:0;font-size:20px;flex-grow:1}
 #lineNumbers{width:45px;background:var(--linenum-bg);color:var(--linenum-color);font-family:monospace;font-size:14px;padding:12px 4px;text-align:right;user-select:none;overflow:hidden;box-sizing:border-box;display:none;line-height:1.5}
 
 /* ZONE EDITEUR CONTENTEDITABLE */
-#content{flex:1;background:var(--bg);color:var(--text);border:none;padding:24px;box-sizing:border-box;font-size:14px;font-family:sans-serif;line-height:1.5;overflow-y:auto;outline:none}
+#content{flex:1;background:var(--bg);color:var(--text);border:none;padding:12px;box-sizing:border-box;font-size:14px;font-family:sans-serif;line-height:1.5;overflow-y:auto;outline:none}
+#content.toolbar-open{padding-bottom:120px;}
 #content[placeholder]:empty:before { content: attr(placeholder); color: #888; }
 #content blockquote { border-left: 4px solid var(--accent); margin: 6px 0; padding-left: 10px; color: #777; font-style: italic; }
 
@@ -257,13 +260,6 @@ header h1{margin:0;font-size:20px;flex-grow:1}
   </div>
 
   <div id="toolbar">
-    <!-- BOUTONS UNDO ET REDO -->
-    <div class="tb-group">
-      <button onmousedown="event.preventDefault(); execCmd('undo');" title="Annuler (Undo)">↩ Undo</button>
-      <button onmousedown="event.preventDefault(); execCmd('redo');" title="Rétablir (Redo)">↪ Redo</button>
-    </div>
-
-    <!-- BOUTONS D'ÉDITION AVEC DÉTECTION D'ÉTAT ACTIF (BLEU) -->
     <div class="tb-group">
       <button id="btn-bold" onmousedown="event.preventDefault(); execCmd('bold');" title="Gras"><b>B</b></button>
       <button id="btn-italic" onmousedown="event.preventDefault(); execCmd('italic');" title="Italique"><i>I</i></button>
@@ -297,6 +293,8 @@ header h1{margin:0;font-size:20px;flex-grow:1}
       <button onmousedown="event.preventDefault(); execCmd('formatBlock', 'h1');" title="Grand Titre">H1</button>
       <button onmousedown="event.preventDefault(); execCmd('formatBlock', 'h2');" title="Sous-titre">H2</button>
       <button onmousedown="event.preventDefault(); addLink();" title="Insérer un lien">🔗</button>
+      <button onmousedown="event.preventDefault(); execCmd('undo');" title="Annuler">↩️</button>
+      <button onmousedown="event.preventDefault(); execCmd('redo');" title="Rétablir">↪️</button>
     </div>
 
     <div class="tb-group">
@@ -519,7 +517,17 @@ document.addEventListener("selectionchange", () => {
 
 contentInput.addEventListener("keyup", updateToolbarState);
 contentInput.addEventListener("mouseup", updateToolbarState);
-contentInput.addEventListener("pointerup", updateToolbarState);
+
+/* ===== BARRE D'OUTILS COLLÉE AU CLAVIER : visible seulement en écriture ===== */
+const floatingToolbar = document.getElementById("toolbar");
+contentInput.addEventListener("focus", () => {
+  floatingToolbar.classList.add("visible");
+  contentInput.classList.add("toolbar-open");
+});
+contentInput.addEventListener("blur", () => {
+  floatingToolbar.classList.remove("visible");
+  contentInput.classList.remove("toolbar-open");
+});
 
 function changeTextSize(sizePt) {
   let sel = window.getSelection();
