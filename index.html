@@ -2,13 +2,18 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,interactive-widget=resizes-content">
 <title>Notes</title>
-<link rel="apple-touch-icon" href="Notes.png">
+<link rel="apple-touch-icon" href="">
 <style>
   * {
       -webkit-tap-highlight-color: transparent;
+  }
+  button, select, .arrow, .item-menu-icon, .theme-btn, .action-btn, #treeList li {
       touch-action: manipulation;
+  }
+  input, textarea, #content, [contenteditable="true"] {
+      touch-action: auto;
   }
 :root {
   --accent:#3a8fd0;
