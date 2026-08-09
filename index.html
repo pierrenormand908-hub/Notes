@@ -70,7 +70,6 @@ header h1{margin:0;font-size:20px;flex-grow:1}
 #toolbar{padding:6px 10px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 .tb-group{display:flex;gap:4px;align-items:center}
 #toolbar button, #toolbar select, .color-btn-label{padding:6px 8px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:6px;font-size:14px;cursor:pointer;height:34px;box-sizing:border-box;display:flex;align-items:center;gap:4px}
-#toolbar button:active{background:var(--accent);color:#fff}
 
 /* BOUTONS D'ÉDITION ACTIFS EN BLEU */
 #toolbar button.active {
@@ -258,6 +257,13 @@ header h1{margin:0;font-size:20px;flex-grow:1}
   </div>
 
   <div id="toolbar">
+    <!-- BOUTONS UNDO ET REDO -->
+    <div class="tb-group">
+      <button onmousedown="event.preventDefault(); execCmd('undo');" title="Annuler (Undo)">↩ Undo</button>
+      <button onmousedown="event.preventDefault(); execCmd('redo');" title="Rétablir (Redo)">↪ Redo</button>
+    </div>
+
+    <!-- BOUTONS D'ÉDITION AVEC DÉTECTION D'ÉTAT ACTIF (BLEU) -->
     <div class="tb-group">
       <button id="btn-bold" onmousedown="event.preventDefault(); execCmd('bold');" title="Gras"><b>B</b></button>
       <button id="btn-italic" onmousedown="event.preventDefault(); execCmd('italic');" title="Italique"><i>I</i></button>
@@ -513,6 +519,7 @@ document.addEventListener("selectionchange", () => {
 
 contentInput.addEventListener("keyup", updateToolbarState);
 contentInput.addEventListener("mouseup", updateToolbarState);
+contentInput.addEventListener("pointerup", updateToolbarState);
 
 function changeTextSize(sizePt) {
   let sel = window.getSelection();
