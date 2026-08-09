@@ -53,26 +53,87 @@ header h1{margin:0;font-size:20px;flex-grow:1}
 #main{position:absolute;top:50px;left:0;right:0;bottom:0;transition:left .25s ease-in-out;display:flex;flex-direction:column}
 #editor-header{padding:8px 10px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;gap:6px;align-items:center}
 
-/* RECTANGLE TITRE & SÉLECTEUR DE POLICE ADAPTÉ IPHONE */
-#node-title{flex:1; min-width:80px; max-width:220px; padding:8px;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:16px;}
-#fontFamilySelect{padding:6px 4px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:6px;font-size:13px;cursor:pointer;height:36px;box-sizing:border-box; max-width:120px; text-overflow:ellipsis;}
+#node-title{flex:1; min-width:80px; padding:8px;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:16px;}
 
-#toggleLinesBtn{padding:6px 10px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-weight:bold;font-size:14px;flex-shrink:0;margin-left:auto;}
-#toggleLinesBtn.active{background:var(--accent);color:#fff}
-
-@media(max-width: 480px) {
-  #node-title { max-width: 190px; }
-  #fontFamilySelect { max-width: 105px; font-size: 12px; padding: 6px 2px; }
-  #editor-header { gap: 4px; padding: 6px; }
+#openEditBtn {
+  padding: 6px 12px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
 }
 
-/* BARRE D'OUTILS COMPACTE */
-#toolbar{padding:6px 10px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+#toggleLinesBtn{padding:6px 10px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-weight:bold;font-size:14px;flex-shrink:0;}
+#toggleLinesBtn.active{background:var(--accent);color:#fff}
+
+.editor-container{display:flex;flex:1;position:relative;overflow:hidden}
+#lineNumbers{width:45px;background:var(--linenum-bg);color:var(--linenum-color);font-family:monospace;font-size:14px;padding:12px 4px;text-align:right;user-select:none;overflow:hidden;box-sizing:border-box;display:none;line-height:1.5}
+
+/* ZONE LECTURE ET ÉDITION DIRECTE DU CONTENU */
+#content{flex:1;background:var(--bg);color:var(--text);border:none;padding:24px;box-sizing:border-box;font-size:14px;font-family:sans-serif;line-height:1.5;overflow-y:auto;outline:none;cursor:text;}
+#content[placeholder]:empty:before { content: attr(placeholder); color: #888; }
+#content blockquote { border-left: 4px solid var(--accent); margin: 6px 0; padding-left: 10px; color: #777; font-style: italic; }
+
+/* FENÊTRE MODALE D'ÉDITION EN PLEIN ÉCRAN */
+#modalEdit {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  z-index: 4000;
+  display: none;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+}
+
+#modalEditHeader {
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.modal-edit-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.modal-edit-topbar h3 {
+  margin: 0;
+  font-size: 16px;
+  color: var(--text);
+}
+
+#closeEditModalBtn {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+/* BARRE D'OUTILS DE LA FENÊTRE D'ÉDITION */
+#toolbar{padding:4px 0;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 .tb-group{display:flex;gap:4px;align-items:center}
 #toolbar button, #toolbar select, .color-btn-label{padding:6px 8px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:6px;font-size:14px;cursor:pointer;height:34px;box-sizing:border-box;display:flex;align-items:center;gap:4px}
 #toolbar button:active{background:var(--accent);color:#fff}
 
-/* BOUTONS D'ÉDITION ACTIFS EN BLEU */
+#fontFamilySelect{padding:6px 4px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:6px;font-size:13px;cursor:pointer;height:34px;box-sizing:border-box; max-width:120px; text-overflow:ellipsis;}
+
 #toolbar button.active {
   background: var(--accent) !important;
   color: #ffffff !important;
@@ -89,13 +150,18 @@ header h1{margin:0;font-size:20px;flex-grow:1}
 .color-picker-wrapper{display:flex;align-items:center;gap:4px;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:2px 6px;height:34px;box-sizing:border-box;font-size:13px}
 .color-picker-wrapper input[type="color"]{width:26px;height:26px;border:none;background:none;cursor:pointer;padding:0}
 
-.editor-container{display:flex;flex:1;position:relative;overflow:hidden}
-#lineNumbers{width:45px;background:var(--linenum-bg);color:var(--linenum-color);font-family:monospace;font-size:14px;padding:12px 4px;text-align:right;user-select:none;overflow:hidden;box-sizing:border-box;display:none;line-height:1.5}
-
-/* ZONE EDITEUR CONTENTEDITABLE */
-#content{flex:1;background:var(--bg);color:var(--text);border:none;padding:24px;box-sizing:border-box;font-size:14px;font-family:sans-serif;line-height:1.5;overflow-y:auto;outline:none}
-#content[placeholder]:empty:before { content: attr(placeholder); color: #888; }
-#content blockquote { border-left: 4px solid var(--accent); margin: 6px 0; padding-left: 10px; color: #777; font-style: italic; }
+#modalContent {
+  flex: 1;
+  background: var(--bg);
+  color: var(--text);
+  padding: 16px;
+  box-sizing: border-box;
+  font-size: 15px;
+  font-family: sans-serif;
+  line-height: 1.5;
+  overflow-y: auto;
+  outline: none;
+}
 
 #modal,#modalSub,#modalNote,#confirmDelete{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;justify-content:center;align-items:center;z-index:3000}
 .modalBox{background:var(--bg2);padding:20px;width:90%;max-width:320px;border-radius:10px;display:flex;flex-direction:column;gap:8px;max-height:90vh;overflow-y:auto}
@@ -226,89 +292,101 @@ header h1{margin:0;font-size:20px;flex-grow:1}
 
 <div id="confirmDelete"><div class="modalBox"><h3>Supprimer ?</h3><p id="delName"></p><div class="modalButtons"><button class="modal-btn cancel-btn" id="delCancel">Annuler</button><button class="modal-btn create-btn" id="delOk" style="background:#d33">Supprimer</button></div></div></div>
 
+<!-- FENÊTRE MODALE D'ÉDITION SÉPARÉE -->
+<div id="modalEdit">
+  <div id="modalEditHeader">
+    <div class="modal-edit-topbar">
+      <h3 id="editModalTitle">Rédaction de la note</h3>
+      <button id="closeEditModalBtn" onclick="closeEditModal()">✔️ Fermer & Enregistrer</button>
+    </div>
+    
+    <div id="toolbar">
+      <div class="tb-group">
+        <select id="fontFamilySelect" onchange="execCmd('fontName', this.value)" title="Changer la police de caractères">
+          <option value="-apple-system" selected>Police</option>
+          <option value="Apple Color Emoji">Apple Color Emoji</option>
+          <option value="Arial">Arial</option>
+          <option value="Arial Black">Arial Black</option>
+          <option value="Arial Narrow">Arial Narrow</option>
+          <option value="Cambria">Cambria</option>
+          <option value="Comic Sans MS">Comic Sans</option>
+          <option value="Consolas">Consolas</option>
+          <option value="Courier New">Courier</option>
+          <option value="Georgia">Georgia</option>
+          <option value="Hiragino Mincho ProN">Hiragino Mincho</option>
+          <option value="Impact">Impact</option>
+          <option value="Lucida Console">Lucida</option>
+          <option value="Monaco">Monaco</option>
+          <option value="Noteworthy">Noteworthy</option>
+          <option value="Segoe UI">Segoe UI</option>
+          <option value="Snell Roundhand">Snell Roundhand</option>
+          <option value="Tahoma">Tahoma</option>
+          <option value="Times New Roman">Times</option>
+          <option value="Trebuchet MS">Trebuchet</option>
+          <option value="Verdana">Verdana</option>
+        </select>
+        
+        <button id="btn-bold" onmousedown="event.preventDefault(); execCmd('bold');" title="Gras"><b>B</b></button>
+        <button id="btn-italic" onmousedown="event.preventDefault(); execCmd('italic');" title="Italique"><i>I</i></button>
+        <button id="btn-underline" onmousedown="event.preventDefault(); execCmd('underline');" title="Souligné"><u>U</u></button>
+        <button id="btn-strike" onmousedown="event.preventDefault(); execCmd('strikeThrough');" title="Barré"><s>S</s></button>
+      </div>
+
+      <div class="tb-group">
+        <button onmousedown="event.preventDefault(); execCmd('insertUnorderedList');" title="Liste à puces">• Liste</button>
+        <button onmousedown="event.preventDefault(); execCmd('insertOrderedList');" title="Liste numérotée">1. Liste</button>
+        <button onmousedown="event.preventDefault(); execCmd('formatBlock', 'blockquote');" title="Citation">💬</button>
+        
+        <select class="select-size-compact" onchange="changeTextSize(this.value);" title="Taille du texte">
+          <option value="8pt">8pt</option>
+          <option value="9pt">9pt</option>
+          <option value="10pt">10pt</option>
+          <option value="11pt">11pt</option>
+          <option value="12pt" selected>12pt</option>
+          <option value="14pt">14pt</option>
+          <option value="16pt">16pt</option>
+          <option value="18pt">18pt</option>
+          <option value="20pt">20pt</option>
+          <option value="24pt">24pt</option>
+          <option value="28pt">28pt</option>
+          <option value="32pt">32pt</option>
+          <option value="36pt">36pt</option>
+        </select>
+      </div>
+
+      <div class="tb-group">
+        <button onmousedown="event.preventDefault(); execCmd('formatBlock', 'h1');" title="Grand Titre">H1</button>
+        <button onmousedown="event.preventDefault(); execCmd('formatBlock', 'h2');" title="Sous-titre">H2</button>
+        <button onmousedown="event.preventDefault(); addLink();" title="Insérer un lien">🔗</button>
+        <button onmousedown="event.preventDefault(); execCmd('undo');" title="Annuler">↩️</button>
+        <button onmousedown="event.preventDefault(); execCmd('redo');" title="Rétablir">↪️</button>
+      </div>
+
+      <div class="tb-group">
+        <div class="color-picker-wrapper" title="Couleur du texte">
+          🎨 Texte <input type="color" id="textColorPicker" onchange="execCmd('foreColor', this.value)">
+        </div>
+        <div class="color-picker-wrapper" title="Surligner le texte">
+          🟡 Fond <input type="color" id="bgColorPicker" value="#ffff00" onchange="execCmd('hiliteColor', this.value)">
+        </div>
+        <button onmousedown="event.preventDefault(); execCmd('removeFormat');" title="Effacer tout le formatage">🧹</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modalContent" contenteditable="true" placeholder="Tape ta note ici..."></div>
+</div>
+
 <div id="main">
   <div id="editor-header">
     <input id="node-title" placeholder="Titre">
-    
-    <select id="fontFamilySelect" onchange="execCmd('fontName', this.value)" title="Changer la police de caractères">
-      <option value="-apple-system" selected>Police</option>
-      <option value="Apple Color Emoji">Apple Color Emoji</option>
-      <option value="Arial">Arial</option>
-      <option value="Arial Black">Arial Black</option>
-      <option value="Arial Narrow">Arial Narrow</option>
-      <option value="Cambria">Cambria</option>
-      <option value="Comic Sans MS">Comic Sans</option>
-      <option value="Consolas">Consolas</option>
-      <option value="Courier New">Courier</option>
-      <option value="Georgia">Georgia</option>
-      <option value="Hiragino Mincho ProN">Hiragino Mincho</option>
-      <option value="Impact">Impact</option>
-      <option value="Lucida Console">Lucida</option>
-      <option value="Monaco">Monaco</option>
-      <option value="Noteworthy">Noteworthy</option>
-      <option value="Segoe UI">Segoe UI</option>
-      <option value="Snell Roundhand">Snell Roundhand</option>
-      <option value="Tahoma">Tahoma</option>
-      <option value="Times New Roman">Times</option>
-      <option value="Trebuchet MS">Trebuchet</option>
-      <option value="Verdana">Verdana</option>
-    </select>
-
     <button id="toggleLinesBtn" title="Afficher/Masquer les numéros de ligne">123</button>
-  </div>
-
-  <div id="toolbar">
-    <div class="tb-group">
-      <button id="btn-bold" onmousedown="event.preventDefault(); execCmd('bold');" title="Gras"><b>B</b></button>
-      <button id="btn-italic" onmousedown="event.preventDefault(); execCmd('italic');" title="Italique"><i>I</i></button>
-      <button id="btn-underline" onmousedown="event.preventDefault(); execCmd('underline');" title="Souligné"><u>U</u></button>
-      <button id="btn-strike" onmousedown="event.preventDefault(); execCmd('strikeThrough');" title="Barré"><s>S</s></button>
-    </div>
-
-    <div class="tb-group">
-      <button onmousedown="event.preventDefault(); execCmd('insertUnorderedList');" title="Liste à puces">• Liste</button>
-      <button onmousedown="event.preventDefault(); execCmd('insertOrderedList');" title="Liste numérotée">1. Liste</button>
-      <button onmousedown="event.preventDefault(); execCmd('formatBlock', 'blockquote');" title="Citation">💬</button>
-      
-      <select class="select-size-compact" onchange="changeTextSize(this.value);" title="Taille du texte">
-        <option value="8pt">8pt</option>
-        <option value="9pt">9pt</option>
-        <option value="10pt">10pt</option>
-        <option value="11pt">11pt</option>
-        <option value="12pt" selected>12pt</option>
-        <option value="14pt">14pt</option>
-        <option value="16pt">16pt</option>
-        <option value="18pt">18pt</option>
-        <option value="20pt">20pt</option>
-        <option value="24pt">24pt</option>
-        <option value="28pt">28pt</option>
-        <option value="32pt">32pt</option>
-        <option value="36pt">36pt</option>
-      </select>
-    </div>
-
-    <div class="tb-group">
-      <button onmousedown="event.preventDefault(); execCmd('formatBlock', 'h1');" title="Grand Titre">H1</button>
-      <button onmousedown="event.preventDefault(); execCmd('formatBlock', 'h2');" title="Sous-titre">H2</button>
-      <button onmousedown="event.preventDefault(); addLink();" title="Insérer un lien">🔗</button>
-      <button onmousedown="event.preventDefault(); execCmd('undo');" title="Annuler">↩️</button>
-      <button onmousedown="event.preventDefault(); execCmd('redo');" title="Rétablir">↪️</button>
-    </div>
-
-    <div class="tb-group">
-      <div class="color-picker-wrapper" title="Couleur du texte">
-        🎨 Texte <input type="color" id="textColorPicker" onchange="execCmd('foreColor', this.value)">
-      </div>
-      <div class="color-picker-wrapper" title="Surligner le texte">
-        🟡 Fond <input type="color" id="bgColorPicker" value="#ffff00" onchange="execCmd('hiliteColor', this.value)">
-      </div>
-      <button onmousedown="event.preventDefault(); execCmd('removeFormat');" title="Effacer tout le formatage">🧹</button>
-    </div>
+    <button id="openEditBtn" onclick="openEditModal()" title="Ouvrir la fenêtre de rédaction">✏️ Écrire</button>
   </div>
 
   <div class="editor-container">
     <div id="lineNumbers"></div>
-    <div id="content" contenteditable="true" placeholder="Tape ta note ou colle ton texte..."></div>
+    <div id="content" contenteditable="true" placeholder="Tape ou modifie ta note ici..." oninput="saveMainContent()"></div>
   </div>
 </div>
 
@@ -449,7 +527,9 @@ sidebar=document.getElementById("sidebar"), main=document.getElementById("main")
 toggleBtn=document.getElementById("toggleSidebar"), closeBtn=document.getElementById("closeSidebar"),
 tree=document.getElementById("treeList"), titleInput=document.getElementById("node-title"),
 contentInput=document.getElementById("content"), lineNumbers=document.getElementById("lineNumbers"),
-toggleLinesBtn=document.getElementById("toggleLinesBtn"), contextMenu=document.getElementById("contextMenu");
+toggleLinesBtn=document.getElementById("toggleLinesBtn"), contextMenu=document.getElementById("contextMenu"),
+modalEdit=document.getElementById("modalEdit"), modalContent=document.getElementById("modalContent"),
+editModalTitle=document.getElementById("editModalTitle");
 
 let tempSelectedIcons = { folder: 'emoji:📁', sub: 'emoji:📂', note: 'emoji:📝' };
 
@@ -483,6 +563,35 @@ function initTheme() {
   setTheme(savedTheme);
 }
 
+function openEditModal() {
+  let i = items.find(x => x.id === currentId);
+  if(!i) return;
+  editModalTitle.textContent = "Édition : " + (i.title || "Nouvelle note");
+  modalContent.innerHTML = i.content || "";
+  modalEdit.style.display = "flex";
+  setTimeout(() => modalContent.focus(), 100);
+}
+
+function closeEditModal() {
+  let i = items.find(x => x.id === currentId);
+  if(i){
+    i.content = modalContent.innerHTML;
+    contentInput.innerHTML = i.content;
+    save();
+    updateLineNumbers();
+  }
+  modalEdit.style.display = "none";
+}
+
+function saveMainContent() {
+  let i = items.find(x => x.id === currentId);
+  if (i) {
+    i.content = contentInput.innerHTML;
+    save();
+    updateLineNumbers();
+  }
+}
+
 function updateToolbarState() {
   const btnBold = document.getElementById("btn-bold");
   const btnItalic = document.getElementById("btn-italic");
@@ -497,24 +606,18 @@ function updateToolbarState() {
 
 function execCmd(command, value = null) {
   document.execCommand(command, false, value);
-  contentInput.focus();
+  modalContent.focus();
   updateToolbarState();
-  let i = items.find(x => x.id === currentId);
-  if(i){
-    i.content = contentInput.innerHTML;
-    save();
-    updateLineNumbers();
-  }
 }
 
 document.addEventListener("selectionchange", () => {
-  if (document.activeElement === contentInput) {
+  if (document.activeElement === modalContent) {
     updateToolbarState();
   }
 });
 
-contentInput.addEventListener("keyup", updateToolbarState);
-contentInput.addEventListener("mouseup", updateToolbarState);
+modalContent.addEventListener("keyup", updateToolbarState);
+modalContent.addEventListener("mouseup", updateToolbarState);
 
 function changeTextSize(sizePt) {
   let sel = window.getSelection();
@@ -546,13 +649,7 @@ function changeTextSize(sizePt) {
     }
   }
 
-  contentInput.focus();
-  let i = items.find(x => x.id === currentId);
-  if(i){
-    i.content = contentInput.innerHTML;
-    save();
-    updateLineNumbers();
-  }
+  modalContent.focus();
 }
 
 function addLink() {
@@ -731,20 +828,10 @@ function loadCurrent(){
     titleInput.value = i.title; 
     contentInput.innerHTML = i.content || ""; 
     updateLineNumbers();
-    updateToolbarState();
   } 
 }
 
 titleInput.oninput = () => { let i = items.find(x => x.id === currentId); if(i){ i.title = titleInput.value; save(); render(); } };
-
-contentInput.oninput = () => { 
-  let i = items.find(x => x.id === currentId); 
-  if(i){ 
-    i.content = contentInput.innerHTML; 
-    save(); 
-    updateLineNumbers();
-  } 
-};
 
 ctxOptions.onclick = () => { openOptionsFor(menuTarget); };
 ctxDelete.onclick = () => {
