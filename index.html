@@ -72,6 +72,13 @@ header h1{margin:0;font-size:20px;flex-grow:1}
 #toolbar button, #toolbar select, .color-btn-label{padding:6px 8px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:6px;font-size:14px;cursor:pointer;height:34px;box-sizing:border-box;display:flex;align-items:center;gap:4px}
 #toolbar button:active{background:var(--accent);color:#fff}
 
+/* BOUTONS D'ÉDITION ACTIFS EN BLEU */
+#toolbar button.active {
+  background: var(--accent) !important;
+  color: #ffffff !important;
+  border-color: var(--accent) !important;
+}
+
 .select-size-compact {
   padding: 6px 2px 6px 6px !important;
   width: auto !important;
@@ -252,10 +259,10 @@ header h1{margin:0;font-size:20px;flex-grow:1}
 
   <div id="toolbar">
     <div class="tb-group">
-      <button onmousedown="event.preventDefault(); execCmd('bold');" title="Gras"><b>B</b></button>
-      <button onmousedown="event.preventDefault(); execCmd('italic');" title="Italique"><i>I</i></button>
-      <button onmousedown="event.preventDefault(); execCmd('underline');" title="Souligné"><u>U</u></button>
-      <button onmousedown="event.preventDefault(); execCmd('strikeThrough');" title="Barré"><s>S</s></button>
+      <button id="btn-bold" onmousedown="event.preventDefault(); execCmd('bold');" title="Gras"><b>B</b></button>
+      <button id="btn-italic" onmousedown="event.preventDefault(); execCmd('italic');" title="Italique"><i>I</i></button>
+      <button id="btn-underline" onmousedown="event.preventDefault(); execCmd('underline');" title="Souligné"><u>U</u></button>
+      <button id="btn-strike" onmousedown="event.preventDefault(); execCmd('strikeThrough');" title="Barré"><s>S</s></button>
     </div>
 
     <div class="tb-group">
@@ -284,8 +291,6 @@ header h1{margin:0;font-size:20px;flex-grow:1}
       <button onmousedown="event.preventDefault(); execCmd('formatBlock', 'h1');" title="Grand Titre">H1</button>
       <button onmousedown="event.preventDefault(); execCmd('formatBlock', 'h2');" title="Sous-titre">H2</button>
       <button onmousedown="event.preventDefault(); addLink();" title="Insérer un lien">🔗</button>
-      <button onmousedown="event.preventDefault(); execCmd('undo');" title="Annuler">↩️</button>
-      <button onmousedown="event.preventDefault(); execCmd('redo');" title="Rétablir">↪️</button>
     </div>
 
     <div class="tb-group">
@@ -476,9 +481,22 @@ function initTheme() {
   setTheme(savedTheme);
 }
 
+function updateToolbarState() {
+  const btnBold = document.getElementById("btn-bold");
+  const btnItalic = document.getElementById("btn-italic");
+  const btnUnderline = document.getElementById("btn-underline");
+  const btnStrike = document.getElementById("btn-strike");
+
+  if (btnBold) btnBold.classList.toggle("active", document.queryCommandState("bold"));
+  if (btnItalic) btnItalic.classList.toggle("active", document.queryCommandState("italic"));
+  if (btnUnderline) btnUnderline.classList.toggle("active", document.queryCommandState("underline"));
+  if (btnStrike) btnStrike.classList.toggle("active", document.queryCommandState("strikeThrough"));
+}
+
 function execCmd(command, value = null) {
   document.execCommand(command, false, value);
   contentInput.focus();
+  updateToolbarState();
   let i = items.find(x => x.id === currentId);
   if(i){
     i.content = contentInput.innerHTML;
@@ -486,6 +504,15 @@ function execCmd(command, value = null) {
     updateLineNumbers();
   }
 }
+
+document.addEventListener("selectionchange", () => {
+  if (document.activeElement === contentInput) {
+    updateToolbarState();
+  }
+});
+
+contentInput.addEventListener("keyup", updateToolbarState);
+contentInput.addEventListener("mouseup", updateToolbarState);
 
 function changeTextSize(sizePt) {
   let sel = window.getSelection();
@@ -702,6 +729,7 @@ function loadCurrent(){
     titleInput.value = i.title; 
     contentInput.innerHTML = i.content || ""; 
     updateLineNumbers();
+    updateToolbarState();
   } 
 }
 
