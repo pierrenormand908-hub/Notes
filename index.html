@@ -133,6 +133,8 @@ header h1{margin:0;font-size:20px;flex-grow:1}
     <button class="action-btn" id="addNote" title="Nouvelle Note / Sous-note">📝</button>
     <button class="action-btn" id="exportBtn" title="Enregistrer l'arbre complet" style="font-size:14px; font-weight:bold;">💾 Enregistrer</button>
     <button class="action-btn" id="importBtn" title="Restaurer l'arbre" style="font-size:14px;">📂 Charger</button>
+    <!-- Champ de fichier masqué pour l'importation -->
+    <input type="file" id="jsonFileInput" accept=".json,application/json" style="display:none;">
   </div>
   <ul id="treeList"></ul>
 </div>
@@ -342,16 +344,15 @@ const customPngIcons = {
   url30: "https://icons.iconarchive.com/icons/aha-soft/perfect-time/32/Calendar-icon.png",
   url31: "https://icons.iconarchive.com/icons/fatcow/farm-fresh/32/apple-corp-icon.png",
   url32: "https://icons.iconarchive.com/icons/tatice/cristal-intense/32/Apple-grey-icon.png",
-  url33: "https://icons.iconarchive.com/icons/oxygen-icons.org/oxygen/32/Places-folder-html-icon.png",
-  url34: "https://icons.iconarchive.com/icons/graphics-vibe/developer/32/html-5-icon.png",
-  url35: "https://icons.iconarchive.com/icons/visualpharm/must-have/32/Redo-icon.png",
-  url36: "https://icons.iconarchive.com/icons/visualpharm/must-have/32/Undo-icon.png",
-  url37: "https://icons.iconarchive.com/icons/dryicons/aesthetica-2/32/sound-icon.png", 
-  url38: "https://icons.iconarchive.com/icons/hopstarter/soft-scraps/32/Folder-icon.png",
-  url39: "https://icons.iconarchive.com/icons/hopstarter/soft-scraps/32/Folder-Generic-Blue-icon.png",
-  url40: "https://icons.iconarchive.com/icons/hopstarter/soft-scraps/32/Folder-Generic-Green-icon.png",
-  url41: "https://icons.iconarchive.com/icons/hopstarter/soft-scraps/32/Folder-Generic-Red-icon.png",
-  url42: "https://icons.iconarchive.com/icons/hopstarter/soft-scraps/32/Folder-Generic-Silver-icon.png"
+  url33: "https://icons.iconarchive.com/icons/graphics-vibe/developer/32/html-5-icon.png",
+  url34: "https://icons.iconarchive.com/icons/visualpharm/must-have/32/Redo-icon.png",
+  url35: "https://icons.iconarchive.com/icons/visualpharm/must-have/32/Undo-icon.png",
+  url36: "https://icons.iconarchive.com/icons/dryicons/aesthetica-2/32/sound-icon.png", 
+  url37: "https://icons.iconarchive.com/icons/hopstarter/soft-scraps/32/Folder-icon.png",
+  url38: "https://icons.iconarchive.com/icons/hopstarter/soft-scraps/32/Folder-Generic-Blue-icon.png",
+  url39: "https://icons.iconarchive.com/icons/hopstarter/soft-scraps/32/Folder-Generic-Green-icon.png",
+  url40: "https://icons.iconarchive.com/icons/hopstarter/soft-scraps/32/Folder-Generic-Red-icon.png",
+  url41: "https://icons.iconarchive.com/icons/hopstarter/soft-scraps/32/Folder-Generic-Silver-icon.png"
 };
 
 const iconOptionsList = [
@@ -436,8 +437,7 @@ const iconOptionsList = [
   { type: 'png', key: 'url38', url: customPngIcons.url38 },
   { type: 'png', key: 'url39', url: customPngIcons.url39 },
   { type: 'png', key: 'url40', url: customPngIcons.url40 },
-  { type: 'png', key: 'url41', url: customPngIcons.url41 },
-  { type: 'png', key: 'url42', url: customPngIcons.url42 }
+  { type: 'png', key: 'url41', url: customPngIcons.url41 }
 ];
 
 let items=[], currentId=null, KEY="notes_joplin", menuTarget=null, showLines=false,
@@ -606,31 +606,58 @@ function load(){
 }
 function save(){ localStorage.setItem(KEY, JSON.stringify(items)); }
 
+// EXPORTATION PAR FICHIE BLOB (Téléchargement direct iOS/PC)
 document.getElementById("exportBtn").onclick = () => {
-  let dataStr = JSON.stringify(items, null, 2);
-  prompt("Voici le texte de vos notes. Restez appuyé dessus pour tout sélectionner et copier :", dataStr);
+  try {
+    const jsonStr = JSON.stringify(items, null, 2);
+    const blob = new Blob([jsonStr], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    
+    const now = new Date();
+    const dateStr = now.toISOString().slice(0, 10);
+    a.href = url;
+    a.download = `notes_sauvegarde_${dateStr}.json`;
+    
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  } catch(err) {
+    alert("Erreur lors de la sauvegarde : " + err.message);
+  }
 };
 
+// IMPORTATION PAR SÉLECTEUR DE FICHIER (Sans copier-coller)
 document.getElementById("importBtn").onclick = () => {
-  let jsonSaisi = prompt("Colle ici le texte de tes notes que tu as sauvegardé :");
-  
-  if (jsonSaisi && jsonSaisi.trim() !== "") {
+  document.getElementById("jsonFileInput").click();
+};
+
+document.getElementById("jsonFileInput").onchange = (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (event) => {
     try {
-      let data = JSON.parse(jsonSaisi.trim());
+      const data = JSON.parse(event.target.result);
       if (Array.isArray(data)) {
         items = data;
         save();
         currentId = items[0]?.id || null;
         render();
         loadCurrent();
-        alert("Tes notes ont été restaurées avec succès !");
+        alert("Vos notes et l'arborescence ont été restaurées avec succès !");
       } else {
-        alert("Le format du texte n'est pas valide (ce n'est pas un tableau de notes).");
+        alert("Le fichier sélectionné ne contient pas un tableau de notes valide.");
       }
     } catch (err) {
-      alert("Erreur : Le texte collé ne correspond pas au format JSON attendu.");
+      alert("Erreur de lecture du fichier JSON : Le fichier semble corrompu.\n\nDétail : " + err.message);
     }
-  }
+    // Réinitialiser le champ fichier
+    e.target.value = "";
+  };
+  reader.readAsText(file);
 };
 
 function iconHTML(i){
