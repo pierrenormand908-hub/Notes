@@ -603,15 +603,7 @@ function save(){ localStorage.setItem(KEY, JSON.stringify(items)); }
 document.getElementById("exportBtn").onclick = () => {
   let dataStr = JSON.stringify(items, null, 2);
   
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(dataStr).then(() => {
-      alert("Toutes tes notes ont été copiées dans le presse-papier ! Tu peux les coller dans l'application Notes d'Apple.");
-    }).catch(() => {
-      prompt("Copie manuellement le texte ci-dessous :", dataStr);
-    });
-  } else {
-    prompt("Copie manuellement le texte ci-dessous :", dataStr);
-  }
+ prompt("Voici le texte de vos notes. Restez appuyé dessus pour tout sélectionner et copier :", dataStr);
 };
 
 document.getElementById("importBtn").onclick = () => {
