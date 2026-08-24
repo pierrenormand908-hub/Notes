@@ -601,32 +601,40 @@ function load(){
 function save(){ localStorage.setItem(KEY, JSON.stringify(items)); }
 
 document.getElementById("exportBtn").onclick = () => {
-  let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(items, null, 2));
-  let dlAnchorElem = document.createElement('a');
-  dlAnchorElem.setAttribute("href", dataStr);
-  dlAnchorElem.setAttribute("download", "mes_notes_arbre.json");
-  document.body.appendChild(dlAnchorElem);
-  dlAnchorElem.click();
-  dlAnchorElem.remove();
+  let dataStr = JSON.stringify(items, null, 2);
+  
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(dataStr).then(() => {
+      alert("Toutes tes notes ont été copiées dans le presse-papier ! Tu peux les coller dans l'application Notes d'Apple.");
+    }).catch(() => {
+      prompt("Copie manuellement le texte ci-dessous :", dataStr);
+    });
+  } else {
+    prompt("Copie manuellement le texte ci-dessous :", dataStr);
+  }
 };
 
-document.getElementById("importBtn").onclick = () => { document.getElementById("importFile").click(); };
-document.getElementById("importFile").onchange = (e) => {
-  let file = e.target.files[0];
-  if(!file) return;
-  let reader = new FileReader();
-  reader.onload = function(event) {
+document.getElementById("importBtn").onclick = () => {
+  let jsonSaisi = prompt("Colle ici le texte de tes notes que tu as sauvegardé :");
+  
+  if (jsonSaisi && jsonSaisi.trim() !== "") {
     try {
-      items = JSON.parse(event.target.result);
-      save();
-      currentId = items[0]?.id || null;
-      render();
-      loadCurrent();
-      alert("Arbre de notes restauré avec succès !");
-    } catch(err) {
-      alert("Erreur lors de la lecture du fichier.");
+      let data = JSON.parse(jsonSaisi.trim());
+      if (Array.isArray(data)) {
+        items = data;
+        save();
+        currentId = items[0]?.id || null;
+        render();
+        loadCurrent();
+        alert("Tes notes ont été restaurées avec succès !");
+      } else {
+        alert("Le format du texte n'est pas valide (ce n'est pas un tableau de notes).");
+      }
+    } catch (err) {
+      alert("Erreur : Le texte collé ne correspond pas au format JSON attendu.");
     }
-  };
+  }
+};
   reader.readAsText(file);
 };
 
