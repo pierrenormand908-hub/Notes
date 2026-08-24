@@ -53,7 +53,6 @@ header h1{margin:0;font-size:20px;flex-grow:1}
 #main{position:absolute;top:50px;left:0;right:0;bottom:0;transition:left .25s ease-in-out;display:flex;flex-direction:column}
 #editor-header{padding:8px 10px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;gap:6px;align-items:center}
 
-/* RECTANGLE TITRE & SÉLECTEUR DE POLICE ADAPTÉ IPHONE */
 #node-title{flex:1; min-width:80px; max-width:220px; padding:8px;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:16px;}
 #fontFamilySelect{padding:6px 4px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:6px;font-size:13px;cursor:pointer;height:36px;box-sizing:border-box; max-width:120px; text-overflow:ellipsis;}
 
@@ -66,13 +65,11 @@ header h1{margin:0;font-size:20px;flex-grow:1}
   #editor-header { gap: 4px; padding: 6px; }
 }
 
-/* BARRE D'OUTILS COMPACTE */
 #toolbar{padding:6px 10px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 .tb-group{display:flex;gap:4px;align-items:center}
 #toolbar button, #toolbar select, .color-btn-label{padding:6px 8px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:6px;font-size:14px;cursor:pointer;height:34px;box-sizing:border-box;display:flex;align-items:center;gap:4px}
 #toolbar button:active{background:var(--accent);color:#fff}
 
-/* BOUTONS D'ÉDITION ACTIFS EN BLEU */
 #toolbar button.active {
   background: var(--accent) !important;
   color: #ffffff !important;
@@ -92,7 +89,6 @@ header h1{margin:0;font-size:20px;flex-grow:1}
 .editor-container{display:flex;flex:1;position:relative;overflow:hidden}
 #lineNumbers{width:45px;background:var(--linenum-bg);color:var(--linenum-color);font-family:monospace;font-size:14px;padding:12px 4px;text-align:right;user-select:none;overflow:hidden;box-sizing:border-box;display:none;line-height:1.5}
 
-/* ZONE EDITEUR CONTENTEDITABLE */
 #content{flex:1;background:var(--bg);color:var(--text);border:none;padding:24px;box-sizing:border-box;font-size:14px;font-family:sans-serif;line-height:1.5;overflow-y:auto;outline:none}
 #content[placeholder]:empty:before { content: attr(placeholder); color: #888; }
 #content blockquote { border-left: 4px solid var(--accent); margin: 6px 0; padding-left: 10px; color: #777; font-style: italic; }
@@ -136,7 +132,7 @@ header h1{margin:0;font-size:20px;flex-grow:1}
     <button class="action-btn" id="addSubFolder" title="Nouveau Sous-dossier">📂</button>
     <button class="action-btn" id="addNote" title="Nouvelle Note / Sous-note">📝</button>
     <button class="action-btn" id="exportBtn" title="Enregistrer l'arbre complet" style="font-size:14px; font-weight:bold;">💾 Enregistrer</button>
-    <button class="action-btn" id="importBtn" title="Restaurer l'arbre" style="font-size:14px;">📂 Charger<input type="file" id="importFile" accept=".json" style="display:none"></button>
+    <button class="action-btn" id="importBtn" title="Restaurer l'arbre" style="font-size:14px;">📂 Charger</button>
   </div>
   <ul id="treeList"></ul>
 </div>
@@ -520,8 +516,6 @@ function changeTextSize(sizePt) {
   let sel = window.getSelection();
   if (!sel.rangeCount || sel.isCollapsed) return;
 
-  let range = sel.getRangeAt(0);
-
   let parentSpan = range.commonAncestorContainer;
   if (parentSpan.nodeType === 3) parentSpan = parentSpan.parentNode;
 
@@ -602,8 +596,7 @@ function save(){ localStorage.setItem(KEY, JSON.stringify(items)); }
 
 document.getElementById("exportBtn").onclick = () => {
   let dataStr = JSON.stringify(items, null, 2);
-  
- prompt("Voici le texte de vos notes. Restez appuyé dessus pour tout sélectionner et copier :", dataStr);
+  prompt("Voici le texte de vos notes. Restez appuyé dessus pour tout sélectionner et copier :", dataStr);
 };
 
 document.getElementById("importBtn").onclick = () => {
@@ -626,8 +619,6 @@ document.getElementById("importBtn").onclick = () => {
       alert("Erreur : Le texte collé ne correspond pas au format JSON attendu.");
     }
   }
-};
-  reader.readAsText(file);
 };
 
 function iconHTML(i){
